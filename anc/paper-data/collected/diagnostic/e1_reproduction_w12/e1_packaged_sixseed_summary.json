@@ -1,0 +1,266 @@
+{
+  "draws": [
+    {
+      "arms": {
+        "grad_real": {
+          "ci95": [
+            0.9374,
+            1.46
+          ],
+          "paired_pp": 1.1923,
+          "verdict": "resolves"
+        },
+        "grad_real_shuffled": {
+          "ci95": [
+            -0.099,
+            0.0825
+          ],
+          "paired_pp": -0.0069,
+          "verdict": "at-floor"
+        },
+        "wire_real": {
+          "ci95": [
+            0.3258,
+            0.7809
+          ],
+          "paired_pp": 0.5516,
+          "verdict": "resolves"
+        }
+      },
+      "cell": "e1_repro_w12_s42",
+      "cloud_seed": 15506276940393031267,
+      "dp_releases": [
+        "forward",
+        "return"
+      ],
+      "seed": 42,
+      "support_leak": {
+        "frames": 4096,
+        "frames_with_exact_agreement": 4096,
+        "row_agreement": 1.0
+      },
+      "train_seconds": 3956.9
+    },
+    {
+      "arms": {
+        "grad_real": {
+          "ci95": [
+            0.4459,
+            0.9549
+          ],
+          "paired_pp": 0.6893,
+          "verdict": "resolves"
+        },
+        "grad_real_shuffled": {
+          "ci95": [
+            -0.1457,
+            0.109
+          ],
+          "paired_pp": -0.0231,
+          "verdict": "at-floor"
+        },
+        "wire_real": {
+          "ci95": [
+            0.4,
+            0.9598
+          ],
+          "paired_pp": 0.6821,
+          "verdict": "resolves"
+        }
+      },
+      "cell": "e1_repro_w12_s43",
+      "cloud_seed": 9783002680928545127,
+      "dp_releases": [
+        "forward",
+        "return"
+      ],
+      "seed": 43,
+      "support_leak": {
+        "frames": 4096,
+        "frames_with_exact_agreement": 4096,
+        "row_agreement": 1.0
+      },
+      "train_seconds": 4008.0
+    },
+    {
+      "arms": {
+        "grad_real": {
+          "ci95": [
+            0.437,
+            0.9631
+          ],
+          "paired_pp": 0.6929,
+          "verdict": "resolves"
+        },
+        "grad_real_shuffled": {
+          "ci95": [
+            -0.0456,
+            0.1492
+          ],
+          "paired_pp": 0.0479,
+          "verdict": "at-floor"
+        },
+        "wire_real": {
+          "ci95": [
+            0.4154,
+            0.9664
+          ],
+          "paired_pp": 0.6918,
+          "verdict": "resolves"
+        }
+      },
+      "cell": "e1_repro_w12_s44",
+      "cloud_seed": 5826927602274714970,
+      "dp_releases": [
+        "forward",
+        "return"
+      ],
+      "seed": 44,
+      "support_leak": {
+        "frames": 4096,
+        "frames_with_exact_agreement": 4096,
+        "row_agreement": 1.0
+      },
+      "train_seconds": 3933.4
+    },
+    {
+      "arms": {
+        "grad_real": {
+          "ci95": [
+            0.5995,
+            1.0934
+          ],
+          "paired_pp": 0.8435,
+          "verdict": "resolves"
+        },
+        "grad_real_shuffled": {
+          "ci95": [
+            -0.1675,
+            0.0344
+          ],
+          "paired_pp": -0.0707,
+          "verdict": "at-floor"
+        },
+        "wire_real": {
+          "ci95": [
+            0.5405,
+            1.0736
+          ],
+          "paired_pp": 0.804,
+          "verdict": "resolves"
+        }
+      },
+      "cell": "e1_repro_w12_s45",
+      "cloud_seed": 9295288035124541366,
+      "dp_releases": [
+        "forward",
+        "return"
+      ],
+      "seed": 45,
+      "support_leak": {
+        "frames": 4096,
+        "frames_with_exact_agreement": 4096,
+        "row_agreement": 1.0
+      },
+      "train_seconds": 3843.9
+    },
+    {
+      "arms": {
+        "grad_real": {
+          "ci95": [
+            0.7044,
+            1.1908
+          ],
+          "paired_pp": 0.9361,
+          "verdict": "resolves"
+        },
+        "grad_real_shuffled": {
+          "ci95": [
+            -0.1116,
+            0.0529
+          ],
+          "paired_pp": -0.0285,
+          "verdict": "at-floor"
+        },
+        "wire_real": {
+          "ci95": [
+            0.4954,
+            1.037
+          ],
+          "paired_pp": 0.7578,
+          "verdict": "resolves"
+        }
+      },
+      "cell": "e1_repro_w12_s46",
+      "cloud_seed": 7150523215701832712,
+      "dp_releases": [
+        "forward",
+        "return"
+      ],
+      "seed": 46,
+      "support_leak": {
+        "frames": 4096,
+        "frames_with_exact_agreement": 4096,
+        "row_agreement": 1.0
+      },
+      "train_seconds": 4372.2
+    },
+    {
+      "arms": {
+        "grad_real": {
+          "ci95": [
+            0.5214,
+            1.0277
+          ],
+          "paired_pp": 0.7705,
+          "verdict": "resolves"
+        },
+        "grad_real_shuffled": {
+          "ci95": [
+            -0.0629,
+            0.003
+          ],
+          "paired_pp": -0.0308,
+          "verdict": "at-floor"
+        },
+        "wire_real": {
+          "ci95": [
+            0.4983,
+            1.0374
+          ],
+          "paired_pp": 0.7618,
+          "verdict": "resolves"
+        }
+      },
+      "cell": "e1_repro_w12_s47",
+      "cloud_seed": 6109822357525396552,
+      "dp_releases": [
+        "forward",
+        "return"
+      ],
+      "seed": 47,
+      "support_leak": {
+        "frames": 4096,
+        "frames_with_exact_agreement": 4096,
+        "row_agreement": 1.0
+      },
+      "train_seconds": 4058.0
+    }
+  ],
+  "grad_real_summary": {
+    "max_pp": 1.1923,
+    "mean_pp": 0.8541,
+    "min_pp": 0.6893,
+    "n_pass_predeclared_band": null,
+    "values_pp": [
+      1.1923,
+      0.6893,
+      0.6929,
+      0.8435,
+      0.9361,
+      0.7705
+    ]
+  },
+  "note": "Six packaged-code draws (65a7aa8), grad_dp=off. s42 served by the pre-existing dirty-tree cloud container; s43-s47 packaged-to-packaged. Committed E1 seeds (dirty tree) for reference: grad_real +0.7945/+0.8064/+0.7726.",
+  "schema": "dtraining.e1_packaged_sixseed.v1"
+}

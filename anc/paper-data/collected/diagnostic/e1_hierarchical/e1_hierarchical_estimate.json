@@ -1,0 +1,187 @@
+{
+  "by_group": {
+    "original": {
+      "I2_pct": 0.0,
+      "Q": 0.03519014767568952,
+      "ci95": [
+        0.6461093773644326,
+        0.9359450947075341
+      ],
+      "fixed_effect_mean_pp": 0.7910272360359833,
+      "max_pp": 0.8064,
+      "mean_pp": 0.7910272360359833,
+      "median_pp": 0.7945,
+      "min_pp": 0.7726,
+      "n": 3,
+      "tau2": 0.0,
+      "tau_pp": 0.0
+    },
+    "packaged": {
+      "I2_pct": 51.69712676352517,
+      "Q": 10.351351099802407,
+      "ci95": [
+        0.7050697379813403,
+        1.0029241250452317
+      ],
+      "fixed_effect_mean_pp": 0.8539645821357186,
+      "max_pp": 1.1923,
+      "mean_pp": 0.853996931513286,
+      "median_pp": 0.8069999999999999,
+      "min_pp": 0.6893,
+      "n": 6,
+      "tau2": 0.017900315704364414,
+      "tau_pp": 0.1337920614399988
+    },
+    "postfreeze": {
+      "I2_pct": 90.27153454370983,
+      "Q": 20.558226875409765,
+      "ci95": [
+        0.58154748395782,
+        1.5059160380102683
+      ],
+      "fixed_effect_mean_pp": 1.0221586970875927,
+      "max_pp": 1.5008,
+      "mean_pp": 1.0437317609840442,
+      "median_pp": 0.9929,
+      "min_pp": 0.6456,
+      "n": 3,
+      "tau2": 0.15046911008926644,
+      "tau_pp": 0.3879034803778724
+    }
+  },
+  "estimand": "grad_real paired token_top1 advantage over the constant baseline, pp",
+  "leave_one_out_mean_pp": {
+    "orig_0": 0.8930531554392509,
+    "orig_1": 0.891760642886449,
+    "orig_2": 0.894907639304165,
+    "s42": 0.8571629813325934,
+    "s43": 0.9022718035389348,
+    "s44": 0.9015762864113973,
+    "s45": 0.8885302051046373,
+    "s46": 0.8799631758709473,
+    "s47": 0.8950546279136655,
+    "s48": 0.9062779561213224,
+    "s49": 0.8325074670055571,
+    "s50": 0.8742717214409308
+  },
+  "method": "normal-normal random effects (DerSimonian-Laird); per-seed SE from committed 95% cluster-bootstrap CIs",
+  "n_seeds": 12,
+  "overall": {
+    "I2_pct": 69.79319512127759,
+    "Q": 36.415635629666916,
+    "ci95": [
+      0.7523557110707026,
+      1.016798191879239
+    ],
+    "fixed_effect_mean_pp": 0.8813381911382356,
+    "max_pp": 1.5008,
+    "mean_pp": 0.8845769514749708,
+    "median_pp": 0.80045,
+    "min_pp": 0.6456,
+    "tau2": 0.03806229097779243,
+    "tau_pp": 0.1950955944602349
+  },
+  "provenance_note": "original group is RELAYED (dirty-tree source of record); packaged and postfreeze are VERIFIED from packaged code. 'verified_only' pools the nine VERIFIED seeds and is the figure cited by the manuscript; 'overall' retains all twelve for continuity with earlier reports.",
+  "schema": "dtraining.e1_hierarchical_estimate.v2",
+  "seeds": [
+    {
+      "group": "original",
+      "paired_pp": 0.7945,
+      "se": 0.12519949346008397,
+      "seed": "orig_0"
+    },
+    {
+      "group": "original",
+      "paired_pp": 0.8064,
+      "se": 0.1308697506688898,
+      "seed": "orig_1"
+    },
+    {
+      "group": "original",
+      "paired_pp": 0.7726,
+      "se": 0.12831868340438907,
+      "seed": "orig_2"
+    },
+    {
+      "group": "packaged",
+      "paired_pp": 1.1923,
+      "se": 0.13331877524281058,
+      "seed": "s42"
+    },
+    {
+      "group": "packaged",
+      "paired_pp": 0.6893,
+      "se": 0.1298493237630895,
+      "seed": "s43"
+    },
+    {
+      "group": "packaged",
+      "paired_pp": 0.6929,
+      "se": 0.13421164878538586,
+      "seed": "s44"
+    },
+    {
+      "group": "packaged",
+      "paired_pp": 0.8435,
+      "se": 0.12599721219369334,
+      "seed": "s45"
+    },
+    {
+      "group": "packaged",
+      "paired_pp": 0.9361,
+      "se": 0.12408391174531778,
+      "seed": "s46"
+    },
+    {
+      "group": "packaged",
+      "paired_pp": 0.7705,
+      "se": 0.12916053560167434,
+      "seed": "s47"
+    },
+    {
+      "group": "postfreeze",
+      "paired_pp": 0.6456,
+      "se": 0.12867583282141914,
+      "seed": "s48"
+    },
+    {
+      "group": "postfreeze",
+      "paired_pp": 1.5008,
+      "se": 0.13857397380768216,
+      "seed": "s49"
+    },
+    {
+      "group": "postfreeze",
+      "paired_pp": 0.9929,
+      "se": 0.11576743246304523,
+      "seed": "s50"
+    }
+  ],
+  "verified_only": {
+    "I2_pct": 76.73662787537195,
+    "Q": 34.38882358560007,
+    "ci95": [
+      0.7422157340672815,
+      1.090484213566619
+    ],
+    "fixed_effect_mean_pp": 0.9115902467298987,
+    "max_pp": 1.5008,
+    "mean_pp": 0.9163499738169503,
+    "median_pp": 0.8435,
+    "min_pp": 0.6456,
+    "n": 9,
+    "seeds": [
+      "s42",
+      "s43",
+      "s44",
+      "s45",
+      "s46",
+      "s47",
+      "s48",
+      "s49",
+      "s50"
+    ],
+    "tau2": 0.05443683446822761,
+    "tau_pp": 0.23331702567156906
+  }
+}

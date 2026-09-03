@@ -1,0 +1,111 @@
+{
+  "version": "latent-native-v7",
+  "launchable": false,
+  "best_empirical_candidate": true,
+  "supersedes": "latent-native-v6",
+  "threat_model": {
+    "tln": "trusted",
+    "ucn": "fully_compromised",
+    "cryptographic_confidentiality": false,
+    "tee": false
+  },
+  "topology": {
+    "model": "Qwen3-0.6B",
+    "split_after": 21,
+    "resume_after": 26,
+    "approximated_middle_layers": 4,
+    "hidden_width": 1024,
+    "wire_width": 16,
+    "wire_rows_per_frame": 48,
+    "chaff_rows_per_frame": 16,
+    "cloud_trainable_parameters": 5
+  },
+  "mechanisms": {
+    "fresh_coordinate_rotation": true,
+    "fresh_token_permutation": true,
+    "fresh_signed_lognormal_token_gauge": true,
+    "chaff_tokens": 16,
+    "key_stream": "ratchet_v2_sha256_counter_mode_128bit_master",
+    "wire_quantization": "off_by_default_fixed_grid_int8_available",
+    "transport": "wss_tls13_pinned_local_ca_hostname_verified",
+    "monomial_equivariant_cloud": true,
+    "forward_return_clip": 1.0,
+    "forward_return_noise_multiplier": 0.35,
+    "tln_remote_gradient_clip": 1.0,
+    "cloud_state_isolated_per_connection": true,
+    "bounded_batch_coalescing": 64,
+    "real_attacker_arms": [
+      "coordinate_plus_invariants",
+      "invariant_only",
+      "invariant_graph"
+    ]
+  },
+  "empirical_gates": {
+    "three_isolated_seeds": true,
+    "attacker_upper95_excess_le_1pp": true,
+    "utility_delta_le_0_35": true,
+    "evaluation_ratio_le_3": true,
+    "zero_cloud_non_bypass": true,
+    "bounded_active_delta_0_5": true,
+    "v2_keystream_confirmation_cell": true
+  },
+  "measured": {
+    "upper95_excess_pp_seeds": [0.576, 0.566, 0.554],
+    "utility_loss_delta_seeds": [0.088, 0.090, 0.088],
+    "eval_time_ratio_seeds": [1.222, 1.278, 1.248],
+    "v2_keystream_excess_pp": 0.676,
+    "v2_keystream_eval_time_ratio": 1.514,
+    "wss_three_seed_excess_pp": [0.541, 0.642, 0.522],
+    "wss_three_seed_loss_delta": [0.094, 0.092, 0.084],
+    "wss_three_seed_eval_time_ratio": [1.505, 1.503, 1.582],
+    "mistral_nemo_12b_seed42": {
+      "split_after": 31,
+      "resume_after": 36,
+      "upper95_excess_pp": 0.540,
+      "loss_delta": -0.411,
+      "eval_time_ratio": 1.111,
+      "gates": "all_pass",
+      "note": "single seed; runner majority-control calibration fixed post-run"
+    },
+    "qwen36_35b_a3b_seed42": {
+      "split_after": 31,
+      "resume_after": 36,
+      "upper95_excess_pp": 0.829,
+      "loss_delta": -0.035,
+      "eval_time_ratio": 1.051,
+      "gates": "all_pass",
+      "note": "single seed; thinnest privacy margin — invariant arms slightly above majority control; replicate seeds and consider noise 0.40 if it replicates"
+    },
+    "qwen36_35b_a3b_v71_recommended": {
+      "noise_multiplier": 0.40,
+      "chaff_tokens": 48,
+      "upper95_excess_pp": 0.421,
+      "loss_delta": -0.032,
+      "eval_time_ratio": 1.047,
+      "gates": "all_pass",
+      "note": "all attacker arms below majority control; best campaign result; n0.35 three-seed replication (0.532/0.829/0.861) motivated the n0.40 step"
+    }
+  },
+  "production_blockers": [
+    "cloud surrogate has only five trainable scalar parameters and does not establish production-scale delegated capacity",
+    "arbitrary malicious cloud computation has no independently verifiable integrity",
+    "reported activation-DP epsilon is millions and is not a useful formal privacy guarantee",
+    "evaluation is a 2000-step Qwen3-0.6B diagnostic rather than convergence or task-quality evidence",
+    "full live attacker suite and split-inference path are not yet covered",
+    "chaff benefit against pooled wire-capture attacks is argued, not measured; real-capture drivers (ica-bss, subspace-joint, leak-accumulation, alignment-search) are unimplemented",
+    "v2 key-stream derivation adds ~0.3x pure-Python eval overhead; vectorize or precompute before scaling"
+  ],
+  "evidence": {
+    "analysis": "docs/experiments/LATENT_V7_DEFENSE_HARDENING.md",
+    "results": "paper-data/collected/diagnostic/latent_v7_defense/",
+    "sweeps": [
+      "bin/latent_v7_sweep1.sh",
+      "bin/latent_v7_sweep2.sh",
+      "bin/latent_v7_sweep2r.sh",
+      "bin/latent_v7_sweep3.sh",
+      "bin/latent_v7_sweep4.sh"
+    ],
+    "collector": "bin/latent_v7_collect.py",
+    "tls_setup": "bin/latent_v7_tls_setup.sh"
+  }
+}

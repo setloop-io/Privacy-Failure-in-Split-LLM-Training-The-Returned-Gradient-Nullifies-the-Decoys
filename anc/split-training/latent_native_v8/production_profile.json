@@ -1,0 +1,42 @@
+{
+  "version": "latent-native-v8",
+  "launchable": false,
+  "prototype": true,
+  "extends": "latent-native-v7",
+  "threat_model": {
+    "tln": "trusted",
+    "ucn": "fully_compromised",
+    "cryptographic_confidentiality": false,
+    "tee": false
+  },
+  "topology": {
+    "wire_width": 16,
+    "wire_rows_per_frame": 48,
+    "chaff_rows_per_frame": 16,
+    "cloud_kind": "monomial_moe",
+    "cloud_experts_default": 8,
+    "cloud_trainable_parameters_e8_2layers": 113
+  },
+  "mechanisms": {
+    "fresh_coordinate_rotation": true,
+    "fresh_token_permutation": true,
+    "fresh_signed_lognormal_token_gauge": true,
+    "chaff_tokens": 16,
+    "key_stream": "ratchet_v2_sha256_counter_mode_128bit_master",
+    "equivariant_moe_router": "squared-gram row statistics only",
+    "transport": "wss_tls13_pinned_local_ca_hostname_verified",
+    "cloud_state_isolated_per_connection": true
+  },
+  "open_questions": [
+    "does expert count restore measurable cloud contribution at 35B scale (v7 trend: 1.43 / 0.79 / 0.40 zero-cloud penalty across 0.6B/12B/35B)",
+    "does routing on invariant features create a new leak channel (router features are a subset of the attacker's invariant arm input)",
+    "privacy margin at larger E and D must be re-measured with the frozen attacker",
+    "runtime cost of E-times Gram-message FLOPs per layer"
+  ],
+  "production_blockers": "same as latent-native-v7 plus the open questions above",
+  "evidence": {
+    "tests": "bin/test_latent_native_v5.py (17 gates incl. MoE equivariance)",
+    "sweeps": ["bin/latent_v8_sweep6.sh"],
+    "analysis": "docs/experiments/LATENT_V7_DEFENSE_HARDENING.md"
+  }
+}

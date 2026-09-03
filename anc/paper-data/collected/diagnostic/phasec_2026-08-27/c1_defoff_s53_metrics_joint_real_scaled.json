@@ -1,0 +1,87 @@
+{
+  "bundle": "/workspace/experiments/results/training/phasec/bundles/c1_defoff_s53/joint_real_scaled.pt",
+  "control_class": 279,
+  "control_recovery_pct": {
+    "rare_token_top1": 0.0
+  },
+  "degenerate_control_subsets": [
+    "rare_token_top1"
+  ],
+  "mean_advantage_by_probe": {
+    "rare_token_top1": {
+      "coordinate_plus_invariants#0": 0.03536067892503536,
+      "coordinate_plus_invariants#1": 0.0,
+      "coordinate_plus_invariants#2": 0.11786892975011787,
+      "invariant_graph#0": 0.0,
+      "invariant_graph#1": 0.0,
+      "invariant_graph#2": 0.08250825082508251,
+      "invariant_only#0": 0.0,
+      "invariant_only#1": 0.0,
+      "invariant_only#2": 0.0
+    },
+    "semantic_cosine": {
+      "coordinate_plus_invariants#0": -0.10552841099843135,
+      "coordinate_plus_invariants#1": -0.10317012183236329,
+      "coordinate_plus_invariants#2": -0.07535818977999043,
+      "invariant_graph#0": -0.013085533125092752,
+      "invariant_graph#1": 0.0007461276460176691,
+      "invariant_graph#2": -0.0015195541213586239,
+      "invariant_only#0": 0.0057020654781752,
+      "invariant_only#1": 0.0026953693118274558,
+      "invariant_only#2": -0.002285605491046283
+    },
+    "token_top1": {
+      "coordinate_plus_invariants#0": -5.084259054340732,
+      "coordinate_plus_invariants#1": -5.2433940819576135,
+      "coordinate_plus_invariants#2": -3.6454025535308694,
+      "invariant_graph#0": 0.5134211959588736,
+      "invariant_graph#1": 1.566625397473596,
+      "invariant_graph#2": 0.8190199946330698,
+      "invariant_only#0": 0.8675863558997631,
+      "invariant_only#1": 0.9826092585478942,
+      "invariant_only#2": 0.4900626188112368
+    }
+  },
+  "metrics_computed": [
+    "rare_token_top1",
+    "semantic_cosine",
+    "token_top1"
+  ],
+  "metrics_unavailable": {
+    "membership_auc": "Needs the same per-row probabilities (its confidence score is the argmax probability).",
+    "property_auc": "Needs property labels per row.",
+    "response_side_recovery": "Needs response-side capture. The transcript protocol records the forward and backward wire, not the response.",
+    "sequence_exact_match": "Released rows carry a fresh per-request permutation shared by both directions, so sequence order never crosses the boundary -- even the joint and cross-Gram views carry no order. The only order-carrying channel would be timing, which is declared unmeasured.",
+    "token_cross_entropy": "This dump carries argmax predictions only. Re-score the arm with latent_probe --dump-eval-probabilities."
+  },
+  "rare_rows": 976,
+  "rare_token_percentile": 50.0,
+  "raw_recovery_pct_by_probe": {
+    "rare_token_top1": {
+      "coordinate_plus_invariants#0": 0.10245901639344263,
+      "coordinate_plus_invariants#1": 0.0,
+      "coordinate_plus_invariants#2": 0.20491803278688525,
+      "invariant_graph#0": 0.0,
+      "invariant_graph#1": 0.0,
+      "invariant_graph#2": 0.10245901639344263,
+      "invariant_only#0": 0.0,
+      "invariant_only#1": 0.0,
+      "invariant_only#2": 0.0
+    },
+    "token_top1": {
+      "coordinate_plus_invariants#0": 4.850746268656716,
+      "coordinate_plus_invariants#1": 4.649827784156142,
+      "coordinate_plus_invariants#2": 6.209337925755836,
+      "invariant_graph#0": 10.610409491006505,
+      "invariant_graph#1": 11.385380788365863,
+      "invariant_graph#2": 10.696517412935323,
+      "invariant_only#0": 10.46689628779181,
+      "invariant_only#1": 10.600841944125527,
+      "invariant_only#2": 10.1415996938385
+    }
+  },
+  "reading_note": "On a subset where control_recovery_pct is 0, the paired advantage equals the raw recovery rate. A +0.0000 advantage there means nothing was recovered, not that the arm matched the control. membership_auc values are AUC - 0.5, so 0.0 is the constant-control floor.",
+  "record_count": 12852,
+  "schema": "dtraining.leakage_metrics.v1",
+  "scoreable_rows": 10452
+}

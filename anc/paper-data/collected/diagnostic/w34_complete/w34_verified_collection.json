@@ -1,0 +1,16 @@
+{
+  "collection_manifest_sha256": "91613c1af0a961fb1b00430e8ce025e051ae6be8c485bb25791b9b1c78573336",
+  "events": 180636,
+  "files_verified": 180642,
+  "note": "Verified complete-transcript collection (W3.4), 3 seeds. Verified by the hardened verifier: 3 sessions, 30,000 optimizer steps, 180,636 events, 180,642 files, state_interval 50. Raw collection on poseidon at ~/experiments/results/training/w34_cloud_transcript_v2/ (root-owned).",
+  "optimizer_steps": 30000,
+  "schema": "dtraining.w34_verified_collection.v1",
+  "session_manifest_sha256": {
+    "session_69b21249-4428-4e97-943a-6fe3f95411f4": "b29debd1b1d712264a7401da0c2ca335ef60cc551db196055d7c2af3f9c98e0d",
+    "session_c7abd87e-cfd5-4247-abb9-45e2a37b80b6": "330994f9f9613efe27436a0063280874964b383e9f17180f08a4fedc1bcb3d27",
+    "session_d3e09274-baac-4f08-a12a-020ca37c8047": "0a4c30692e03aae57c2b57450a46e628270eab5a7163d48e6938612a41d3da43"
+  },
+  "sessions": 3,
+  "state_interval": 50,
+  "verified": true
+}

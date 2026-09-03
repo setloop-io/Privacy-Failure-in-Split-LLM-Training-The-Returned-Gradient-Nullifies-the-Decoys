@@ -1,0 +1,98 @@
+{
+  "bundle": "/workspace/experiments/results/training/e1_unprotected/bundles/e1_repro_w12_s45/grad_real.pt",
+  "control_class": 1154,
+  "control_recovery_pct": {
+    "rare_token_top1": 0.0
+  },
+  "degenerate_control_subsets": [
+    "rare_token_top1"
+  ],
+  "mean_advantage_by_probe": {
+    "membership_auc": {
+      "coordinate_plus_invariants#0": -0.0022675395011901855,
+      "coordinate_plus_invariants#1": -0.00012618303298950195,
+      "coordinate_plus_invariants#2": -0.001078486442565918,
+      "invariant_graph#0": 0.0012827515602111816,
+      "invariant_graph#1": -0.007538795471191406,
+      "invariant_graph#2": -0.01568293571472168,
+      "invariant_only#0": 0.0005472898483276367,
+      "invariant_only#1": -0.0010944008827209473,
+      "invariant_only#2": -0.0006070733070373535
+    },
+    "rare_token_top1": {
+      "coordinate_plus_invariants#0": 0.0,
+      "coordinate_plus_invariants#1": 0.0,
+      "coordinate_plus_invariants#2": 0.0,
+      "invariant_graph#0": 0.0,
+      "invariant_graph#1": 0.0,
+      "invariant_graph#2": 0.0,
+      "invariant_only#0": 0.0,
+      "invariant_only#1": 0.0,
+      "invariant_only#2": 0.0
+    },
+    "token_cross_entropy": {
+      "coordinate_plus_invariants#0": 1.6502928754780442,
+      "coordinate_plus_invariants#1": 1.7103083013789728,
+      "coordinate_plus_invariants#2": 1.6866271991748363,
+      "invariant_graph#0": 1.5563213239656761,
+      "invariant_graph#1": 1.6658269207691774,
+      "invariant_graph#2": 1.590558159397915,
+      "invariant_only#0": 1.8703312186989933,
+      "invariant_only#1": 1.9560739967273548,
+      "invariant_only#2": 2.0104734818451107
+    },
+    "token_top1": {
+      "coordinate_plus_invariants#0": 0.8435390991071786,
+      "coordinate_plus_invariants#1": 0.7454196414351598,
+      "coordinate_plus_invariants#2": 0.6756264953462169,
+      "invariant_graph#0": 0.8289834129624564,
+      "invariant_graph#1": 0.5890377688112832,
+      "invariant_graph#2": 0.6061147178726402,
+      "invariant_only#0": 0.6452297761845318,
+      "invariant_only#1": 0.470282520604731,
+      "invariant_only#2": 0.2931673372888834
+    }
+  },
+  "metrics_computed": [
+    "membership_auc",
+    "rare_token_top1",
+    "token_cross_entropy",
+    "token_top1"
+  ],
+  "metrics_unavailable": {
+    "property_auc": "Needs property labels per row.",
+    "response_side_recovery": "Needs response-side capture. The transcript protocol records the forward and backward wire, not the response.",
+    "semantic_recovery": "No similarity measure has been chosen. PLAN.md W2.6 records this as an open item that must be named before freeze.",
+    "sequence_exact_match": "Released rows carry a fresh token permutation, so the sequence order is not recoverable from the dump. Needs the trusted-side permutation, which is correctly sealed away."
+  },
+  "rare_rows": 3829,
+  "rare_token_percentile": 50.0,
+  "raw_recovery_pct_by_probe": {
+    "rare_token_top1": {
+      "coordinate_plus_invariants#0": 0.0,
+      "coordinate_plus_invariants#1": 0.0,
+      "coordinate_plus_invariants#2": 0.0,
+      "invariant_graph#0": 0.0,
+      "invariant_graph#1": 0.0,
+      "invariant_graph#2": 0.0,
+      "invariant_only#0": 0.0,
+      "invariant_only#1": 0.0,
+      "invariant_only#2": 0.0
+    },
+    "token_top1": {
+      "coordinate_plus_invariants#0": 6.248546537629022,
+      "coordinate_plus_invariants#1": 6.155524945886478,
+      "coordinate_plus_invariants#2": 6.091125382372408,
+      "invariant_graph#0": 6.2431799073361836,
+      "invariant_graph#1": 6.014203681508381,
+      "invariant_graph#2": 6.033881325915457,
+      "invariant_only#0": 6.055347847086814,
+      "invariant_only#1": 5.887193431244522,
+      "invariant_only#2": 5.702939124523712
+    }
+  },
+  "reading_note": "On a subset where control_recovery_pct is 0, the paired advantage equals the raw recovery rate. A +0.0000 advantage there means nothing was recovered, not that the arm matched the control. membership_auc values are AUC - 0.5, so 0.0 is the constant-control floor.",
+  "record_count": 70434,
+  "schema": "dtraining.leakage_metrics.v1",
+  "scoreable_rows": 55901
+}

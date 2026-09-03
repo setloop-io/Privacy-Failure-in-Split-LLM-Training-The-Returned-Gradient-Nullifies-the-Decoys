@@ -1,0 +1,61 @@
+{
+  "schema": "distributed-privacy.production-profile.v1",
+  "mode": "training",
+  "launchable": false,
+  "reason": "Required compromised-UCN privacy mechanisms are not yet implemented and validated.",
+  "topology": {
+    "trusted": "tln",
+    "compromised": "ucn",
+    "model_class": "7B",
+    "split_after_depth": 8
+  },
+  "knowledge_evaluation": {
+    "operational": "K0",
+    "known_plaintext": "adaptive_until_saturation",
+    "fixed_pair_target": null
+  },
+  "ratchet": {
+    "version": "v2",
+    "width": "full",
+    "matrix": "orthogonal",
+    "max_pairs_per_key": 64,
+    "oversized_forward": "fail",
+    "master_bits": 128,
+    "master_source": "tln_csprng_mode_0600",
+    "master_on_ucn": "forbidden_for_privacy_candidate",
+    "shared_seed_mode_allowed_for_claim": false
+  },
+  "batching": {
+    "micro_batch_size": 1,
+    "sequence_length": 64,
+    "require_rows_per_forward_lte_pair_budget": true
+  },
+  "directions": ["forward", "backward"],
+  "dp_sgd": {
+    "enabled": true,
+    "scope": "tln_local_parameters_only",
+    "per_example": true,
+    "max_grad_norm": 1.0,
+    "epsilon_target_max": 3.0,
+    "noise_multiplier": "derive_from_total_steps_for_epsilon_target",
+    "delta": 1e-6,
+    "accountant": "zcdp_no_subsampling_replace_one_upper_bound"
+  },
+  "prompt_template_randomization": {
+    "enabled": true,
+    "rng": "csprng",
+    "slot_permutation": true,
+    "padding": true,
+    "matched_block_manifest": true
+  },
+  "required_before_launch": [
+    "superseded_by_production_v3",
+    "private_local_encoder",
+    "learned_irreversible_bottleneck",
+    "adversarial_representation_training",
+    "formal_forward_activation_ldp",
+    "formal_backward_gradient_ldp",
+    "live_active_cloud_defence",
+    "real_two_node_runtime_validation"
+  ]
+}

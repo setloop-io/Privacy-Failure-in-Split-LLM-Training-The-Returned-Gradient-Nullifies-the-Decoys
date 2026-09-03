@@ -1,0 +1,481 @@
+{
+  "baselines": [
+    {
+      "arms": {
+        "grad_real": {
+          "lift_pp": 0.708,
+          "paired_ci95": [
+            0.5543,
+            1.0451
+          ],
+          "paired_pp": 0.7945,
+          "u95_excess_pp": 0.9342,
+          "verdict": "resolves"
+        },
+        "grad_real_shuffled": {
+          "lift_pp": -0.0168,
+          "paired_ci95": [
+            -0.0826,
+            0.0494
+          ],
+          "paired_pp": -0.0169,
+          "u95_excess_pp": 0.1995,
+          "verdict": "at-floor"
+        },
+        "wire_real": {
+          "lift_pp": 0.621,
+          "paired_ci95": [
+            0.4913,
+            1.0161
+          ],
+          "paired_pp": 0.7555,
+          "u95_excess_pp": 0.8455,
+          "verdict": "resolves"
+        }
+      },
+      "cell": "e1_unprot_a2b_split14",
+      "dp_releases": [
+        "forward",
+        "return"
+      ],
+      "outbound_grad_dp": null,
+      "support_leak": {
+        "frames": 4096,
+        "frames_with_exact_agreement": 4096,
+        "row_agreement": 1.0
+      },
+      "train_seconds": 3933.8
+    },
+    {
+      "arms": {
+        "grad_real": {
+          "lift_pp": 0.7339,
+          "paired_ci95": [
+            0.5455,
+            1.0588
+          ],
+          "paired_pp": 0.8064,
+          "u95_excess_pp": 0.9607,
+          "verdict": "resolves"
+        },
+        "grad_real_shuffled": {
+          "lift_pp": -0.0061,
+          "paired_ci95": [
+            -0.0857,
+            0.0687
+          ],
+          "paired_pp": -0.0068,
+          "u95_excess_pp": 0.2081,
+          "verdict": "at-floor"
+        },
+        "wire_real": {
+          "lift_pp": 0.5692,
+          "paired_ci95": [
+            0.4023,
+            0.9262
+          ],
+          "paired_pp": 0.6643,
+          "u95_excess_pp": 0.7926,
+          "verdict": "resolves"
+        }
+      },
+      "cell": "e1_unprot_a2b_split14_s43",
+      "dp_releases": [
+        "forward",
+        "return"
+      ],
+      "outbound_grad_dp": null,
+      "support_leak": {
+        "frames": 4096,
+        "frames_with_exact_agreement": 4096,
+        "row_agreement": 1.0
+      },
+      "train_seconds": 3934.5
+    },
+    {
+      "arms": {
+        "grad_real": {
+          "lift_pp": 0.6989,
+          "paired_ci95": [
+            0.5234,
+            1.0263
+          ],
+          "paired_pp": 0.7726,
+          "u95_excess_pp": 0.9249,
+          "verdict": "resolves"
+        },
+        "grad_real_shuffled": {
+          "lift_pp": 0.0015,
+          "paired_ci95": [
+            -0.1,
+            0.1065
+          ],
+          "paired_pp": 0.0025,
+          "u95_excess_pp": 0.2148,
+          "verdict": "at-floor"
+        },
+        "wire_real": {
+          "lift_pp": 0.5554,
+          "paired_ci95": [
+            0.3522,
+            0.9019
+          ],
+          "paired_pp": 0.6226,
+          "u95_excess_pp": 0.7786,
+          "verdict": "resolves"
+        }
+      },
+      "cell": "e1_unprot_a2b_split14_s44",
+      "dp_releases": [
+        "forward",
+        "return"
+      ],
+      "outbound_grad_dp": null,
+      "support_leak": {
+        "frames": 4096,
+        "frames_with_exact_agreement": 4096,
+        "row_agreement": 1.0
+      },
+      "train_seconds": 3743.6
+    }
+  ],
+  "repro_cells": [
+    "e1_repro_w12_s42",
+    "e1_repro_w12_s43",
+    "e1_repro_w12_s44"
+  ],
+  "reproduced": false,
+  "schema": "dtraining.e1_reproduction.v1",
+  "seeds": [
+    {
+      "checks": {
+        "chaff_partition_disclosed": {
+          "got": {
+            "frames": 4096,
+            "frames_with_exact_agreement": 4096,
+            "row_agreement": 1.0
+          },
+          "pass": true
+        },
+        "grad_real_paired": {
+          "band_pp": 0.1443,
+          "baseline_spread": [
+            0.7726,
+            0.8064
+          ],
+          "baseline_verdicts": [
+            "resolves"
+          ],
+          "got": 1.1923,
+          "pass": false,
+          "repro_verdict": "resolves"
+        },
+        "grad_real_shuffled_paired": {
+          "band_pp": 0.1443,
+          "baseline_spread": [
+            -0.0169,
+            0.0025
+          ],
+          "baseline_verdicts": [
+            "at-floor"
+          ],
+          "got": -0.0069,
+          "pass": true,
+          "repro_verdict": "at-floor"
+        },
+        "gradient_unaccounted": {
+          "got": [
+            "forward",
+            "return"
+          ],
+          "pass": true
+        },
+        "null_at_floor": {
+          "got": "at-floor",
+          "note": "any arm named shuffled is a null and must read at-floor",
+          "pass": true
+        },
+        "wire_real_paired": {
+          "band_pp": 0.1443,
+          "baseline_spread": [
+            0.6226,
+            0.7555
+          ],
+          "baseline_verdicts": [
+            "resolves"
+          ],
+          "got": 0.5516,
+          "pass": true,
+          "repro_verdict": "resolves"
+        }
+      },
+      "repro": {
+        "arms": {
+          "grad_real": {
+            "lift_pp": 1.0559,
+            "paired_ci95": [
+              0.9374,
+              1.46
+            ],
+            "paired_pp": 1.1923,
+            "u95_excess_pp": 1.2889,
+            "verdict": "resolves"
+          },
+          "grad_real_shuffled": {
+            "lift_pp": -0.0076,
+            "paired_ci95": [
+              -0.099,
+              0.0825
+            ],
+            "paired_pp": -0.0069,
+            "u95_excess_pp": 0.2085,
+            "verdict": "at-floor"
+          },
+          "wire_real": {
+            "lift_pp": 0.4837,
+            "paired_ci95": [
+              0.3258,
+              0.7809
+            ],
+            "paired_pp": 0.5516,
+            "u95_excess_pp": 0.7055,
+            "verdict": "resolves"
+          }
+        },
+        "cell": "e1_repro_w12_s42",
+        "dp_releases": [
+          "forward",
+          "return"
+        ],
+        "outbound_grad_dp": null,
+        "support_leak": {
+          "frames": 4096,
+          "frames_with_exact_agreement": 4096,
+          "row_agreement": 1.0
+        },
+        "train_seconds": 3956.9
+      },
+      "reproduced": false
+    },
+    {
+      "checks": {
+        "chaff_partition_disclosed": {
+          "got": {
+            "frames": 4096,
+            "frames_with_exact_agreement": 4096,
+            "row_agreement": 1.0
+          },
+          "pass": true
+        },
+        "grad_real_paired": {
+          "band_pp": 0.1443,
+          "baseline_spread": [
+            0.7726,
+            0.8064
+          ],
+          "baseline_verdicts": [
+            "resolves"
+          ],
+          "got": 0.6893,
+          "pass": true,
+          "repro_verdict": "resolves"
+        },
+        "grad_real_shuffled_paired": {
+          "band_pp": 0.1443,
+          "baseline_spread": [
+            -0.0169,
+            0.0025
+          ],
+          "baseline_verdicts": [
+            "at-floor"
+          ],
+          "got": -0.0231,
+          "pass": true,
+          "repro_verdict": "at-floor"
+        },
+        "gradient_unaccounted": {
+          "got": [
+            "forward",
+            "return"
+          ],
+          "pass": true
+        },
+        "null_at_floor": {
+          "got": "at-floor",
+          "note": "any arm named shuffled is a null and must read at-floor",
+          "pass": true
+        },
+        "wire_real_paired": {
+          "band_pp": 0.1443,
+          "baseline_spread": [
+            0.6226,
+            0.7555
+          ],
+          "baseline_verdicts": [
+            "resolves"
+          ],
+          "got": 0.6821,
+          "pass": true,
+          "repro_verdict": "resolves"
+        }
+      },
+      "repro": {
+        "arms": {
+          "grad_real": {
+            "lift_pp": 0.6302,
+            "paired_ci95": [
+              0.4459,
+              0.9549
+            ],
+            "paired_pp": 0.6893,
+            "u95_excess_pp": 0.8549,
+            "verdict": "resolves"
+          },
+          "grad_real_shuffled": {
+            "lift_pp": -0.0214,
+            "paired_ci95": [
+              -0.1457,
+              0.109
+            ],
+            "paired_pp": -0.0231,
+            "u95_excess_pp": 0.1922,
+            "verdict": "at-floor"
+          },
+          "wire_real": {
+            "lift_pp": 0.5814,
+            "paired_ci95": [
+              0.4,
+              0.9598
+            ],
+            "paired_pp": 0.6821,
+            "u95_excess_pp": 0.8051,
+            "verdict": "resolves"
+          }
+        },
+        "cell": "e1_repro_w12_s43",
+        "dp_releases": [
+          "forward",
+          "return"
+        ],
+        "outbound_grad_dp": null,
+        "support_leak": {
+          "frames": 4096,
+          "frames_with_exact_agreement": 4096,
+          "row_agreement": 1.0
+        },
+        "train_seconds": 4008.0
+      },
+      "reproduced": true
+    },
+    {
+      "checks": {
+        "chaff_partition_disclosed": {
+          "got": {
+            "frames": 4096,
+            "frames_with_exact_agreement": 4096,
+            "row_agreement": 1.0
+          },
+          "pass": true
+        },
+        "grad_real_paired": {
+          "band_pp": 0.1443,
+          "baseline_spread": [
+            0.7726,
+            0.8064
+          ],
+          "baseline_verdicts": [
+            "resolves"
+          ],
+          "got": 0.6929,
+          "pass": true,
+          "repro_verdict": "resolves"
+        },
+        "grad_real_shuffled_paired": {
+          "band_pp": 0.1443,
+          "baseline_spread": [
+            -0.0169,
+            0.0025
+          ],
+          "baseline_verdicts": [
+            "at-floor"
+          ],
+          "got": 0.0479,
+          "pass": true,
+          "repro_verdict": "at-floor"
+        },
+        "gradient_unaccounted": {
+          "got": [
+            "forward",
+            "return"
+          ],
+          "pass": true
+        },
+        "null_at_floor": {
+          "got": "at-floor",
+          "note": "any arm named shuffled is a null and must read at-floor",
+          "pass": true
+        },
+        "wire_real_paired": {
+          "band_pp": 0.1443,
+          "baseline_spread": [
+            0.6226,
+            0.7555
+          ],
+          "baseline_verdicts": [
+            "resolves"
+          ],
+          "got": 0.6918,
+          "pass": true,
+          "repro_verdict": "resolves"
+        }
+      },
+      "repro": {
+        "arms": {
+          "grad_real": {
+            "lift_pp": 0.6348,
+            "paired_ci95": [
+              0.437,
+              0.9631
+            ],
+            "paired_pp": 0.6929,
+            "u95_excess_pp": 0.8596,
+            "verdict": "resolves"
+          },
+          "grad_real_shuffled": {
+            "lift_pp": 0.0443,
+            "paired_ci95": [
+              -0.0456,
+              0.1492
+            ],
+            "paired_pp": 0.0479,
+            "u95_excess_pp": 0.2591,
+            "verdict": "at-floor"
+          },
+          "wire_real": {
+            "lift_pp": 0.5753,
+            "paired_ci95": [
+              0.4154,
+              0.9664
+            ],
+            "paired_pp": 0.6918,
+            "u95_excess_pp": 0.7989,
+            "verdict": "resolves"
+          }
+        },
+        "cell": "e1_repro_w12_s44",
+        "dp_releases": [
+          "forward",
+          "return"
+        ],
+        "outbound_grad_dp": null,
+        "support_leak": {
+          "frames": 4096,
+          "frames_with_exact_agreement": 4096,
+          "row_agreement": 1.0
+        },
+        "train_seconds": 3933.4
+      },
+      "reproduced": true
+    }
+  ]
+}

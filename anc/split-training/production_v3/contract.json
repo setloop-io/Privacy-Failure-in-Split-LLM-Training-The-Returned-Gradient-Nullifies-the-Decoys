@@ -1,0 +1,28 @@
+{
+  "schema": "distributed-privacy.e2e.v3",
+  "experiment_id": "e2e_training_production_v3",
+  "status": "implemented_not_launchable",
+  "trusted_node": "tln",
+  "compromised_nodes": ["ucn", "peer_b"],
+  "attacker_knowledge": "unknown_at_start_then_adaptive_persistent",
+  "privacy_claim_excludes": ["encryption", "tee", "seed_secrecy_on_ucn", "capture_deletion"],
+  "mechanisms": [
+    "deeper_private_split",
+    "learned_irreversible_bottleneck",
+    "adversarial_representation_training",
+    "formal_bidirectional_activation_dp",
+    "four_direction_atomic_budget",
+    "csprng_prompt_and_batch_randomization",
+    "canonical_replay_resistance",
+    "two_server_finite_field_additive_sharing"
+  ],
+  "acceptance": {
+    "privacy_reference": "matched_label_free_and_undefended_controls",
+    "max_recovery_excess_percentage_points": 2.0,
+    "max_mean_eval_loss_delta": 0.35,
+    "formal_composed_epsilon_max": 3.0,
+    "all_required_attacks_complete": true,
+    "no_single_seed_claim": true,
+    "no_smoke_claim": true
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "schema": "dtraining.claim_evidence_ledger.v1",
+  "title": "Paper 1 claim and evidence ledger",
+  "policy": {
+    "allowed_statuses": [
+      "supported",
+      "conditional",
+      "withdrawn",
+      "pending"
+    ],
+    "rule": "A claim may not be broader than its recorded adversary view. Conditional and pending claims are not headline claims."
+  },
+  "claims": [
+    {
+      "id": "forward_frame_probe_resistance",
+      "statement": "The named frozen forward-frame probes did not exceed their matched majority control in the recorded latent-native v5 configuration.",
+      "adversary_view": "Post-training released forward frames only; excludes training gradients, remote state, optimizer state, timing, and cross-step history.",
+      "configuration": "latent-native v5, split_after=14, latent_dim=64, 48 chaff rows, rotation and token permutation, 10,000 steps.",
+      "seeds": [42],
+      "artifacts": [
+        "paper-data/collected/diagnostic/threat_model_scope/grad_channel_10k_split14.json",
+        "paper-data/collected/diagnostic/threat_model_scope/grad_channel_10k_split14_attacker.json"
+      ],
+      "statistical_unit": "Token row; historical dependence audit identifies block-level clustering.",
+      "positive_control": "Historical naked/defended bundles exist, but are not representation-matched complete-view controls.",
+      "status": "conditional",
+      "provenance": {
+        "code_commit": "b1915da473bbb2ae2356a2bf9b0ac98e1d4462ef (attacker artifact)",
+        "dirty_state": "unknown",
+        "tokenizer": "Qwen3-0.6B tokenizer (historical run metadata incomplete)",
+        "corpus": "WikiText-2 tokenized variant",
+        "corpus_split": "256 train and 256 evaluation blocks; exact corpus bytes identified in corpus_manifest_original.json"
+      },
+      "limitations": [
+        "Not a complete compromised-node view.",
+        "One seed is not a headline confirmation set.",
+        "Forward-only success is not privacy evidence without matched positive controls."
+      ]
+    },
+    {
+      "id": "gradient_channel_leak",
+      "statement": "The historical gradient-channel audit found recovery above its matched control and exact real/chaff support disclosure.",
+      "adversary_view": "Captured TLN-to-UCN output gradients and matched released forward frames.",
+      "configuration": "latent-native v5, split_after=14, latent_dim=64, 48 chaff rows, 10,000 steps.",
+      "seeds": [42],
+      "artifacts": [
+        "docs/experiments/THREAT_MODEL_SCOPE_AUDIT.md",
+        "paper-data/collected/diagnostic/threat_model_scope/grad_power_10k_w4096_split14_arm_grad_real.json",
+        "paper-data/collected/diagnostic/threat_model_scope/grad_power_10k_w4096_split14_arm_grad_real_shuffled.json"
+      ],
+      "statistical_unit": "Token row, with frame-level dependence requiring clustered analysis.",
+      "positive_control": "None. The shuffled-label gradient arm is a NEGATIVE control and was previously mislabelled here as positive. No positive control exists for this claim; building one is PLAN.md W2.2.",
+      "status": "conditional",
+      "provenance": {
+        "code_commit": "historical artifact metadata only",
+        "dirty_state": "unknown",
+        "tokenizer": "historical run metadata incomplete",
+        "corpus": "WikiText-2 tokenized variant",
+        "corpus_split": "historical final-window capture; raw tensors are not packaged"
+      },
+      "limitations": [
+        "The raw .pt capture required for independent reproduction is absent from this package.",
+        "The captured cell was not a forward-gate-passing headline configuration."
+      ]
+    },
+    {
+      "id": "end_to_end_fully_compromised_privacy",
+      "statement": "The system provides privacy against a fully compromised cloud during training.",
+      "adversary_view": "Would require the complete training transcript, remote state, timing, and adaptive attacks.",
+      "configuration": "No qualifying configuration exists in the package.",
+      "seeds": [],
+      "artifacts": [
+        "PLAN.md",
+        "docs/experiments/THREAT_MODEL_SCOPE_AUDIT.md"
+      ],
+      "statistical_unit": "Not applicable until a complete-view protocol is executed.",
+      "positive_control": "Not applicable until a complete-view protocol is executed.",
+      "status": "withdrawn",
+      "provenance": {
+        "code_commit": "not applicable",
+        "dirty_state": "not applicable",
+        "tokenizer": "not applicable",
+        "corpus": "not applicable",
+        "corpus_split": "not applicable"
+      },
+      "limitations": [
+        "No complete-view artifact has been captured or attacked."
+      ]
+    },
+    {
+      "id": "mine_as_privacy_certificate",
+      "statement": "MINE or Donsker-Varadhan estimates near zero certify low mutual information or privacy.",
+      "adversary_view": "Not applicable; this is an invalid inference from an estimator.",
+      "configuration": "Historical latent-native MINE experiments.",
+      "seeds": [],
+      "artifacts": [
+        "PLAN.md",
+        "docs/experiments/ADVERSARIAL_REVIEW_EXTERNAL.md"
+      ],
+      "statistical_unit": "Not applicable.",
+      "positive_control": "Not applicable.",
+      "status": "withdrawn",
+      "provenance": {
+        "code_commit": "not applicable",
+        "dirty_state": "not applicable",
+        "tokenizer": "not applicable",
+        "corpus": "not applicable",
+        "corpus_split": "not applicable"
+      },
+      "limitations": [
+        "The estimator is not an upper bound and cannot serve as a privacy certificate."
+      ]
+    },
+    {
+      "id": "complete_view_capture_implementation",
+      "statement": "The latent-native server can collect a manifested complete remote session view for independent analysis.",
+      "adversary_view": "All messages observed or emitted by the cloud process, its model and optimizer state, controls, timing, and cross-step identifiers.",
+      "configuration": "split-training/latent_cloud_server.py with --transcript-dir.",
+      "seeds": [],
+      "artifacts": [
+        "privacy_runtime/remote_transcript.py",
+        "split-training/latent_cloud_server.py",
+        "bin/verify_remote_transcript.py",
+        "docs/experiments/REMOTE_TRANSCRIPT_PROTOCOL.md"
+      ],
+      "statistical_unit": "Remote WebSocket session and optimizer step.",
+      "positive_control": "None. attacker/full_view.py:158 asserts a single session; no multi-session fixture and no verifier self-test exist. Building them is PLAN.md W3.1.",
+      "status": "conditional",
+      "provenance": {
+        "code_commit": "current working tree",
+        "dirty_state": "clean at 85456ab",
+        "tokenizer": "not applicable",
+        "corpus": "not applicable",
+        "corpus_split": "not applicable"
+      },
+      "limitations": [
+        "No forward-gate-passing production capture has been run in this package."
+      ]
+    },
+    {
+      "id": "measurement_failure_analysis_contribution",
+      "statement": "A threat-model-complete evaluation methodology and failure analysis is the active contribution.",
+      "adversary_view": "Explicitly enumerated per experiment; no unstated complete-cloud claim.",
+      "configuration": "Paper 1 working package.",
+      "seeds": [],
+      "artifacts": [
+        "PLAN.md",
+        "outputs/PAPER_SCIENTIFIC_REVIEW_2026-08-20.md",
+        "docs/experiments/THREAT_MODEL_SCOPE_AUDIT.md"
+      ],
+      "statistical_unit": "Claim-to-artifact traceability.",
+      "positive_control": "Not applicable; this is a reporting and evaluation methodology claim.",
+      "status": "supported",
+      "provenance": {
+        "code_commit": "current working tree",
+        "dirty_state": "clean at 85456ab",
+        "tokenizer": "not applicable",
+        "corpus": "not applicable",
+        "corpus_split": "not applicable"
+      },
+      "limitations": [
+        "The methodology still requires the planned complete-view experiments before it can support a positive systems claim."
+      ]
+    }
+  ]
+}

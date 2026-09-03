@@ -1,0 +1,160 @@
+{
+  "bundles": {
+    "grad_all": {
+      "eval_blocks": [
+        256,
+        80,
+        64
+      ],
+      "eval_rows": 20480,
+      "path": "/workspace/experiments/results/training/gradaudit/bundles/gradaudit_ladder_s13_2k/grad_all.pt",
+      "train_blocks": [
+        256,
+        80,
+        64
+      ]
+    },
+    "grad_real": {
+      "eval_blocks": [
+        256,
+        32,
+        64
+      ],
+      "eval_rows": 8192,
+      "path": "/workspace/experiments/results/training/gradaudit/bundles/gradaudit_ladder_s13_2k/grad_real.pt",
+      "train_blocks": [
+        256,
+        32,
+        64
+      ]
+    },
+    "grad_real_shuffled": {
+      "eval_blocks": [
+        256,
+        32,
+        64
+      ],
+      "eval_rows": 8192,
+      "path": "/workspace/experiments/results/training/gradaudit/bundles/gradaudit_ladder_s13_2k/grad_real_shuffled.pt",
+      "train_blocks": [
+        256,
+        32,
+        64
+      ]
+    },
+    "grad_shuffled": {
+      "eval_blocks": [
+        256,
+        80,
+        64
+      ],
+      "eval_rows": 20480,
+      "path": "/workspace/experiments/results/training/gradaudit/bundles/gradaudit_ladder_s13_2k/grad_shuffled.pt",
+      "train_blocks": [
+        256,
+        80,
+        64
+      ]
+    },
+    "joint_real": {
+      "eval_blocks": [
+        256,
+        32,
+        128
+      ],
+      "eval_rows": 8192,
+      "path": "/workspace/experiments/results/training/gradaudit/bundles/gradaudit_ladder_s13_2k/joint_real.pt",
+      "train_blocks": [
+        256,
+        32,
+        128
+      ]
+    },
+    "joint_real_scaled": {
+      "eval_blocks": [
+        256,
+        32,
+        128
+      ],
+      "eval_rows": 8192,
+      "path": "/workspace/experiments/results/training/gradaudit/bundles/gradaudit_ladder_s13_2k/joint_real_scaled.pt",
+      "train_blocks": [
+        256,
+        32,
+        128
+      ]
+    },
+    "wire_all": {
+      "eval_blocks": [
+        256,
+        80,
+        64
+      ],
+      "eval_rows": 20480,
+      "path": "/workspace/experiments/results/training/gradaudit/bundles/gradaudit_ladder_s13_2k/wire_all.pt",
+      "train_blocks": [
+        256,
+        80,
+        64
+      ]
+    },
+    "wire_real": {
+      "eval_blocks": [
+        256,
+        32,
+        64
+      ],
+      "eval_rows": 8192,
+      "path": "/workspace/experiments/results/training/gradaudit/bundles/gradaudit_ladder_s13_2k/wire_real.pt",
+      "train_blocks": [
+        256,
+        32,
+        64
+      ]
+    }
+  },
+  "capture": "/workspace/experiments/results/training/gradaudit/bundles/gradaudit_ladder_s13_2k_gradchannel.pt",
+  "config": {
+    "chaff_tokens": 48,
+    "grad_clip_norm": null,
+    "grad_noise_multiplier": null,
+    "noise_multiplier": 0.35,
+    "outbound_grad_dp": "off",
+    "remote_grad_clip": 1.0,
+    "seq_len": 32,
+    "split_after": 13,
+    "steps": 2000,
+    "train_blocks": 256,
+    "wire_quant": "none"
+  },
+  "magnitudes": {
+    "outbound_forward_frame_rows": {
+      "max": 3.9404351711273193,
+      "mean": 2.9567527770996094,
+      "median": 2.953530788421631,
+      "min": 1.9501675367355347,
+      "p95": 3.386287212371826,
+      "rows": 40960
+    },
+    "outbound_output_gradient_rows": {
+      "max": 0.4795181155204773,
+      "mean": 0.0114405807107687,
+      "median": 0.007004228420555592,
+      "min": 0.0010351869277656078,
+      "p95": 0.032057035714387894,
+      "rows": 16384
+    }
+  },
+  "schema": "dtraining.grad_channel_bundles.v1",
+  "support_leak": {
+    "frames": 512,
+    "frames_with_exact_agreement": 512,
+    "frames_with_exact_agreement_pct": 100.0,
+    "nonzero_rows_per_frame_max": 32,
+    "nonzero_rows_per_frame_min": 32,
+    "real_rows_per_frame": 32,
+    "row_agreement_zero_support_vs_real": 1.0,
+    "rows_per_frame": 80
+  },
+  "unique_blocks": false
+}

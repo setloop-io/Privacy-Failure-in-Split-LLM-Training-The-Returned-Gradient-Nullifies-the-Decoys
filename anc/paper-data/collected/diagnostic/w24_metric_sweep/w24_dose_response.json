@@ -1,0 +1,196 @@
+{
+  "doses": [
+    {
+      "amplitude": 1.0,
+      "coverage": 0.0,
+      "membership_auc": 0.0913,
+      "mode": "coordinate",
+      "rare_token_top1": 0.0038,
+      "tag": "coord_cov0",
+      "token_cross_entropy": 1.114,
+      "token_top1": 0.4065
+    },
+    {
+      "amplitude": 1.0,
+      "coverage": 0.005,
+      "membership_auc": 0.0919,
+      "mode": "coordinate",
+      "rare_token_top1": 0.0221,
+      "tag": "coord_cov0.005",
+      "token_cross_entropy": 1.1139,
+      "token_top1": 0.353
+    },
+    {
+      "amplitude": 1.0,
+      "coverage": 0.01,
+      "membership_auc": 0.0917,
+      "mode": "coordinate",
+      "rare_token_top1": 0.0221,
+      "tag": "coord_cov0.01",
+      "token_cross_entropy": 1.1139,
+      "token_top1": 0.3098
+    },
+    {
+      "amplitude": 1.0,
+      "coverage": 0.02,
+      "membership_auc": 0.0929,
+      "mode": "coordinate",
+      "rare_token_top1": 0.0817,
+      "tag": "coord_cov0.02",
+      "token_cross_entropy": 1.114,
+      "token_top1": 0.3472
+    },
+    {
+      "amplitude": 1.0,
+      "coverage": 0.04,
+      "membership_auc": 0.0925,
+      "mode": "coordinate",
+      "rare_token_top1": 0.3157,
+      "tag": "coord_cov0.04",
+      "token_cross_entropy": 1.1138,
+      "token_top1": 0.3502
+    },
+    {
+      "amplitude": 1.0,
+      "coverage": 0.06,
+      "membership_auc": 0.0953,
+      "mode": "coordinate",
+      "rare_token_top1": 0.6653,
+      "tag": "coord_cov0.06",
+      "token_cross_entropy": 1.1142,
+      "token_top1": 0.9846
+    },
+    {
+      "amplitude": 1.0,
+      "coverage": 0.1,
+      "membership_auc": 0.095,
+      "mode": "coordinate",
+      "rare_token_top1": 1.9686,
+      "tag": "coord_cov0.10",
+      "token_cross_entropy": 1.1149,
+      "token_top1": 4.1927
+    },
+    {
+      "amplitude": 1.0,
+      "coverage": 0.3,
+      "membership_auc": 0.0964,
+      "mode": "coordinate",
+      "rare_token_top1": 14.1815,
+      "tag": "coord_cov0.30",
+      "token_cross_entropy": 1.1303,
+      "token_top1": 22.5141
+    },
+    {
+      "amplitude": 0.05,
+      "coverage": 1.0,
+      "membership_auc": 0.0903,
+      "mode": "coordinate",
+      "rare_token_top1": 0.0,
+      "tag": "coord_amp0.05",
+      "token_cross_entropy": 1.1139,
+      "token_top1": 0.4082
+    },
+    {
+      "amplitude": 0.1,
+      "coverage": 1.0,
+      "membership_auc": 0.0915,
+      "mode": "coordinate",
+      "rare_token_top1": 0.0132,
+      "tag": "coord_amp0.10",
+      "token_cross_entropy": 1.1138,
+      "token_top1": 1.3174
+    },
+    {
+      "amplitude": 0.15,
+      "coverage": 1.0,
+      "membership_auc": 0.0925,
+      "mode": "coordinate",
+      "rare_token_top1": 0.0132,
+      "tag": "coord_amp0.15",
+      "token_cross_entropy": 1.1137,
+      "token_top1": 5.3337
+    },
+    {
+      "amplitude": 0.2,
+      "coverage": 1.0,
+      "membership_auc": 0.0966,
+      "mode": "coordinate",
+      "rare_token_top1": 0.045,
+      "tag": "coord_amp0.20",
+      "token_cross_entropy": 1.1135,
+      "token_top1": 10.9055
+    },
+    {
+      "amplitude": 0.3,
+      "coverage": 1.0,
+      "membership_auc": 0.1124,
+      "mode": "coordinate",
+      "rare_token_top1": 0.3,
+      "tag": "coord_amp0.30",
+      "token_cross_entropy": 1.5223,
+      "token_top1": 26.8908
+    },
+    {
+      "amplitude": 0.5,
+      "coverage": 1.0,
+      "membership_auc": 0.1586,
+      "mode": "coordinate",
+      "rare_token_top1": 7.1355,
+      "tag": "coord_amp0.50",
+      "token_cross_entropy": 4.7821,
+      "token_top1": 64.0283
+    },
+    {
+      "amplitude": 1.0,
+      "coverage": 1.0,
+      "membership_auc": 0.0581,
+      "mode": "coordinate",
+      "rare_token_top1": 100.0,
+      "tag": "coord_cov1.0",
+      "token_cross_entropy": 7.0247,
+      "token_top1": 94.8782
+    },
+    {
+      "amplitude": 1.0,
+      "coverage": 0.05,
+      "membership_auc": 0.0904,
+      "mode": "invariant",
+      "rare_token_top1": 0.017,
+      "tag": "inv_cov0.05",
+      "token_cross_entropy": 1.1145,
+      "token_top1": 0.2731
+    },
+    {
+      "amplitude": 1.0,
+      "coverage": 0.25,
+      "membership_auc": 0.0937,
+      "mode": "invariant",
+      "rare_token_top1": 0.0287,
+      "tag": "inv_cov0.25",
+      "token_cross_entropy": 1.1267,
+      "token_top1": 0.0021
+    },
+    {
+      "amplitude": 1.0,
+      "coverage": 0.5,
+      "membership_auc": 0.0983,
+      "mode": "invariant",
+      "rare_token_top1": 0.0221,
+      "tag": "inv_cov0.50",
+      "token_cross_entropy": 1.1887,
+      "token_top1": 0.0858
+    },
+    {
+      "amplitude": 1.0,
+      "coverage": 1.0,
+      "membership_auc": 0.1139,
+      "mode": "invariant",
+      "rare_token_top1": 0.043,
+      "tag": "inv_cov1.0",
+      "token_cross_entropy": 1.7018,
+      "token_top1": 7.3608
+    }
+  ],
+  "note": "W2.4 axis-1: dose-response for the four emitting metrics on the E1 s44 packaged bundle. membership_auc is AUC-0.5; CE inverts on nulls -- read arm-minus-null. Frame-length/training-size are axis-2.",
+  "schema": "dtraining.w24_dose_response.v1"
+}

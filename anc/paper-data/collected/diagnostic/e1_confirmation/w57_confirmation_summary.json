@@ -1,0 +1,102 @@
+{
+  "note": "Post-freeze confirmatory E1 replication (W5.7), freeze commit 222c4a7. Three fresh seeds (48/49/50), GRAD_DP=off, scored against the frozen thresholds. These are the confirmatory numbers W6.1 may cite; the pre-freeze seeds stay exploratory.",
+  "schema": "dtraining.w57_confirmation.v1",
+  "seeds": [
+    {
+      "grad_real": {
+        "ci95": [
+          0.3928,
+          0.8972
+        ],
+        "paired_pp": 0.6456,
+        "verdict": "resolves"
+      },
+      "grad_real_shuffled": {
+        "ci95": [
+          -0.1482,
+          0.0372
+        ],
+        "paired_pp": -0.0571,
+        "verdict": "at-floor"
+      },
+      "seed": 48,
+      "support_leak": {
+        "agree": 4096,
+        "frames": 4096,
+        "row_agreement": 1.0
+      },
+      "wire_real": {
+        "ci95": [
+          0.2211,
+          0.7718
+        ],
+        "paired_pp": 0.5023,
+        "verdict": "resolves"
+      }
+    },
+    {
+      "grad_real": {
+        "ci95": [
+          1.2258,
+          1.769
+        ],
+        "paired_pp": 1.5008,
+        "verdict": "resolves"
+      },
+      "grad_real_shuffled": {
+        "ci95": [
+          -0.0335,
+          0.0778
+        ],
+        "paired_pp": 0.0232,
+        "verdict": "at-floor"
+      },
+      "seed": 49,
+      "support_leak": {
+        "agree": 4096,
+        "frames": 4096,
+        "row_agreement": 1.0
+      },
+      "wire_real": {
+        "ci95": [
+          0.6059,
+          1.1442
+        ],
+        "paired_pp": 0.8721,
+        "verdict": "resolves"
+      }
+    },
+    {
+      "grad_real": {
+        "ci95": [
+          0.7702,
+          1.224
+        ],
+        "paired_pp": 0.9929,
+        "verdict": "resolves"
+      },
+      "grad_real_shuffled": {
+        "ci95": [
+          -0.0504,
+          0.1802
+        ],
+        "paired_pp": 0.065,
+        "verdict": "at-floor"
+      },
+      "seed": 50,
+      "support_leak": {
+        "agree": 4096,
+        "frames": 4096,
+        "row_agreement": 1.0
+      },
+      "wire_real": {
+        "ci95": [
+          0.3612,
+          0.9025
+        ],
+        "paired_pp": 0.6326,
+        "verdict": "resolves"
+      }
+    }
+  ]
+}

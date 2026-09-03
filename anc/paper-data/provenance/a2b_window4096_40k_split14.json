@@ -1,0 +1,71 @@
+{
+  "cell": "a2b_window4096_40k_split14",
+  "cloud": "wss://poseidon.cluster:5025 (poseidon/UCN)",
+  "container": "split-inference:spark",
+  "eval_loss_delta": 0.9137303841416724,
+  "gates_as_recorded": {
+    "cloud_correction_improves_loss": true,
+    "cloud_latent_only": true,
+    "eval_time_ratio_le_3": true,
+    "privacy_above_band_le_1pct": true,
+    "secret_coordinates_hidden_from_ucn": true,
+    "token_norm_and_sign_gauged": false,
+    "token_order_hidden_from_ucn": true,
+    "utility_delta_le_0_35": false
+  },
+  "host": "odysseus (trusted/TLN)",
+  "label_free_majority_pct": 4.29168701171875,
+  "not_recorded_in_artifact": {
+    "attack_steps": {
+      "source": "bin/deleg6040_grad_cell_t2b.sh, which its own header states copies bin/deleg6040_cell.sh verbatim",
+      "value_used": 256
+    },
+    "clip_norm": {
+      "source": "same",
+      "value_used": 1.0
+    },
+    "lr": {
+      "source": "same",
+      "value_used": "3e-4"
+    }
+  },
+  "note": "Passes the forward-privacy leg only. utility_delta_le_0_35 is false at eval_loss_delta 0.9137, and token_norm_and_sign_gauged is false.",
+  "recovered": "2026-08-22",
+  "recovered_from_artifact": {
+    "adversary_strength": 1.0,
+    "attacker_updates": 3,
+    "byzantine_verify": false,
+    "chaff_tokens": 48,
+    "cloud_experts": 8,
+    "cloud_kind": "monomial_moe_radial",
+    "cloud_layers": 2,
+    "eval_blocks": 4096,
+    "fragment_channels": 1,
+    "gram_flatten": 0.0,
+    "latent_dim": 64,
+    "mine_penalty": 0.1,
+    "model": "/workspace/experiments/models/qwen3-0.6b",
+    "noise_multiplier": 0.35,
+    "probe_restarts": 3,
+    "remote_grad_clip": 1.0,
+    "resume_after": 26,
+    "secret_token_permutation": true,
+    "secret_wire_rotation": true,
+    "seed": 42,
+    "sequence_length": 32,
+    "split_after": 14,
+    "steps": 40000,
+    "token_scale_sigma": 0.75,
+    "train_blocks": 4096,
+    "warmup_steps": 200,
+    "wire_quant": "none"
+  },
+  "run_started_utc": "2026-08-18T16:09:19Z",
+  "schema": "dtraining.cell_provenance.v1",
+  "source_of_truth": "the cell's own result JSON, which embeds every runner parameter; cross-checked against ~/experiments/results/training/deleg6040/A2b.log on odysseus",
+  "task": "PLAN.md W0.0",
+  "unresolved": [
+    "No a2b runner script is committed anywhere: grep -rn 'a2b' in ~/dtraining/bin returns nothing. The launcher has diverged since - deleg6040_cell.sh now echoes a sublayer= field that A2b.log does not contain, so the cell predates --delegate-sublayer.",
+    "Exact code commit and dirty-state patch for the 2026-08-18 run are not recorded. ~/dtraining is at b1915da; whether the run used that tree unmodified is not established."
+  ]
+}

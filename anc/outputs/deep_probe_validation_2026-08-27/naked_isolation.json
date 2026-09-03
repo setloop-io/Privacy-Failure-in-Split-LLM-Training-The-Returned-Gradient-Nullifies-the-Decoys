@@ -1,0 +1,53 @@
+{
+  "schema": "dtraining.attacker.deep_inversion_probe.v1",
+  "config": {
+    "attack": "deep_inversion_probe",
+    "mode": "training",
+    "latent_dim": 1024,
+    "train_blocks": 256,
+    "eval_blocks": 64,
+    "sequence_length": 32,
+    "epochs": 50,
+    "batch_size": 128,
+    "restarts": 1,
+    "layers": 4,
+    "heads": 8
+  },
+  "threat_model": "Deep sequence-to-sequence Transformer inversion probe, built to pass the naked positive control. best_eval_acc selects over epochs on the evaluation set (stated, not hidden); final_epoch_acc is reported beside it.",
+  "provenance": {
+    "hostname": "MacBookPro",
+    "container_image": "unknown",
+    "timestamp_utc": "2026-08-27T19:53:31Z",
+    "dtraining_commit": "78fc7d3bad1f77d690963f2fc78c587460c0a3c3"
+  },
+  "results": [
+    {
+      "condition": "real",
+      "majority_acc": 0.03857421875,
+      "wilson_upper": 0.04514389910395514,
+      "excess_pp": 0.6569680353955137,
+      "restart_best_scores": [
+        0.03759765625
+      ],
+      "restart_final_scores": [
+        0.02783203125
+      ],
+      "best_eval_acc": 0.03759765625,
+      "final_epoch_acc": 0.02783203125
+    },
+    {
+      "restart_best_scores": [
+        0.0361328125
+      ],
+      "restart_final_scores": [
+        0.03076171875
+      ],
+      "best_eval_acc": 0.0361328125,
+      "final_epoch_acc": 0.03076171875,
+      "condition": "shuffled_null",
+      "excess_pp": 0.4976678042625582
+    }
+  ],
+  "summary": [],
+  "interpretation": "Positive control: the probe must break the naked boundary; the defended reading is meaningful only against this demonstrated sensitivity."
+}

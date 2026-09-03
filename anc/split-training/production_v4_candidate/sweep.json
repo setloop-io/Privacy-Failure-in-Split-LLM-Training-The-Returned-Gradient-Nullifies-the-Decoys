@@ -1,0 +1,49 @@
+{
+  "schema": "dtraining.production_v4_candidate_sweep.v1",
+  "model": "Qwen3-0.6B",
+  "threat_model": {"trusted": "tln", "compromised": "ucn"},
+  "common": {
+    "split_after": 15,
+    "resume_after": 26,
+    "sequence_length": 64,
+    "micro_batch_size": 1,
+    "gradient_accumulation": 16,
+    "steps": 1,
+    "four_direction_accounting": true,
+    "transform": "dense_sandwich",
+    "raw_capture_policy": "temporary_then_delete"
+  },
+  "arms": [
+    {"name": "plain", "rotation": false, "boundary_dp": false, "dp_sgd": false},
+    {"name": "norm_audit", "rotation": false, "boundary_norm_audit": true,
+     "evidence_status": "private_diagnostic_not_formal_dp_calibration"},
+    {"name": "structured_b256_rejected", "rotation_budget": 256,
+     "transform": "structured_hadamard", "status": "rejected_privacy"},
+    {"name": "rotation_b256", "rotation_budget": 256, "boundary_dp": false, "dp_sgd": false},
+    {"name": "rotation_b512", "rotation_budget": 512, "boundary_dp": false, "dp_sgd": false},
+    {"name": "rotation_b1024", "rotation_budget": 1024, "boundary_dp": false, "dp_sgd": false},
+    {"name": "rotation_token_dp", "rotation_budget": 512,
+     "boundary_dp": {"target_epsilon": 8.0, "delta": 1e-6,
+                     "forward_rho_fraction": 0.65,
+                     "adjacency_unit": "one_boundary_token_row"},
+     "dp_sgd": false},
+    {"name": "full_stack", "rotation_budget": 512,
+     "boundary_dp": {"target_epsilon": 8.0, "delta": 1e-6,
+                     "forward_rho_fraction": 0.65,
+                     "adjacency_unit": "one_boundary_token_row"},
+     "dp_sgd": true}
+  ],
+  "attack_solve_rows_per_epoch": [8, 16, 32, 64],
+  "gates": {
+    "max_recovery_above_label_free_band_pct": 1.0,
+    "max_eval_loss_delta": 0.35,
+    "max_step_time_ratio": 3.0,
+    "max_boundary_epsilon": 8.0
+  },
+  "launchable": false,
+  "launch_blockers": [
+    "structured transform must pass adaptive known-plaintext attacks",
+    "at least one arm must pass privacy, utility, and cost together",
+    "multi-step convergence and independent repetitions remain required"
+  ]
+}

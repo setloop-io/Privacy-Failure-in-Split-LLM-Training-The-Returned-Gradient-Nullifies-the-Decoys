@@ -1,0 +1,33 @@
+{
+  "affects": [
+    "E1 (e1_unprot_a2b_split14) and its seed replications",
+    "gradfix_a2b_split14, produced by the same tree",
+    "every arm scored with the odysseus latent_probe.py"
+  ],
+  "base_commit": "b1915da",
+  "base_commit_resolvable_in_this_repo": false,
+  "captured": "2026-08-22",
+  "dirty_patch": "paper-data/provenance/odysseus_dtraining_b1915da.patch",
+  "dirty_patch_sha256": "21ea9908f412cded7f2e4086c2e3918a412700b6fb9b387bd0b038379426f6ad",
+  "dirty_tracked_files": 5,
+  "does_not_invalidate": "E1's dp.releases evidence still holds: gradfix, run from the SAME tree, emitted a gradient entry with clip 0.01, and E1 did not. The accountant on that tree can emit it. What is broken is REPRODUCIBILITY from this repository, not the internal validity of the comparison.",
+  "file_list": "paper-data/provenance/odysseus_dtraining_dirty_files.txt",
+  "host": "odysseus",
+  "path": "~/dtraining",
+  "required_before_publication": [
+    "Port the gradient-DP implementation into this repository (PLAN.md W1.2).",
+    "Re-run E1 from the packaged code and confirm the result reproduces.",
+    "Until then, every E1 number is RELAYED under claim-discipline rule 8, not VERIFIED, because it cannot be re-derived from a committed artifact by a named command."
+  ],
+  "runtime_file_sha256": {
+    "attacker/attacks/latent_probe.py": "cdb9d0a47af3ef8223d4e0af1bdf82994633e1d07a355c8ab5bacb2be6757e3b",
+    "bin/deleg6040_grad_bundle.py": "06cff50b53e78dbb2dccfb27fe1cceeb9c0cfdb44ccff50bdc0ad46a6ffd4560",
+    "bin/run_latent_native_v5_06b.py": "7820ee8d33c48ffd552fd2c13d1e3e9636fd2678bcbead24ceebab8c22976892",
+    "privacy_runtime/activation_dp.py": "857e90094a07feb7a7aa398462c5fda8f755644c6a025073b3ef5392d3b4d44d"
+  },
+  "schema": "dtraining.e1_source_of_record.v1",
+  "source_archive": "paper-data/provenance/e1_source_of_record/e1_runtime_sources.tar.gz",
+  "source_archive_sha256": "7bbd4e3d653ee7eb93b4eac5017f124f9c545ffaf568cb649854c53a8acd0061",
+  "untracked_files": 22,
+  "why": "The E1 result was produced by code that is NOT in this repository. The runner on odysseus is a dirty working tree: 5 modified tracked files and 22 untracked files on top of upstream commit b1915da, which itself is not an object in this repo. The packaged bin/run_latent_native_v5_06b.py has no --outbound-grad-dp flag and privacy_runtime/activation_dp.py has no gradient accounting at all, so the documented E1 command cannot run against the packaged code. This archive is the exact source that ran, captured before the working tree could change."
+}

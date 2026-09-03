@@ -1,0 +1,35 @@
+{
+  "schema": "dtraining.attacker.deep_inversion_probe.v1",
+  "config": {
+    "attack": "deep_inversion_probe",
+    "mode": "training",
+    "latent_dim": 1024,
+    "train_blocks": 256,
+    "eval_blocks": 256,
+    "sequence_length": 80,
+    "epochs": 50,
+    "batch_size": 128,
+    "restarts": 1,
+    "layers": 4,
+    "heads": 8
+  },
+  "threat_model": "Deep sequence-to-sequence Transformer inversion probe. Built specifically to act as a reliable positive control by proving it can decode raw, undefended (naked) 1024-D representations.",
+  "provenance": {
+    "hostname": "tln",
+    "container_image": "unknown",
+    "timestamp_utc": "2026-08-25T16:46:09Z",
+    "dtraining_commit": "c5dfe00ab44a7ddae35a16ca587e7a8661257ec1"
+  },
+  "results": [
+    {
+      "majority_acc": 0.052880859375,
+      "best_eval_acc": 0.052978515625,
+      "wilson_upper": 0.05561256458069527,
+      "excess_pp": 0.2731705205695274,
+      "restart_scores": [
+        0.052978515625
+      ]
+    }
+  ],
+  "summary": []
+}

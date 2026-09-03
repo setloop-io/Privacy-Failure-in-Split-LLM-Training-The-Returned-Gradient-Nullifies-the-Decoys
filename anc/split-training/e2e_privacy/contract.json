@@ -1,0 +1,127 @@
+{
+  "schema": "distributed-privacy.e2e.v1",
+  "experiment_id": "e2e_training_production_v1",
+  "mode": "training",
+  "status": "not_ready",
+  "research_question": "Can a trusted local node delegate split training to a fully compromised cloud while bounding content recovery without relying on encryption or TEE for privacy?",
+  "roles": {
+    "trusted_node": "tln",
+    "compromised_node": "ucn"
+  },
+  "adversary": {
+    "host_root": true,
+    "process_memory": true,
+    "vram": true,
+    "cloud_weights": true,
+    "protocol_state": true,
+    "endpoint_traffic": true,
+    "persistent_cross_session": true,
+    "active_protocol_deviation": true
+  },
+  "evaluation_knowledge": {
+    "operational_start": "K0",
+    "allowed_classes": ["K0", "adaptive-known-plaintext"],
+    "known_plaintext": {
+      "class": "adaptive-known-plaintext",
+      "stop_rule": "recovery_curve_saturation_or_resource_cap",
+      "fixed_pair_target": null,
+      "cross_epoch_pooling_required": true
+    }
+  },
+  "privacy_claim_excludes": [
+    "transport_encryption",
+    "emulated_tee",
+    "hardware_tee",
+    "seed_secrecy_on_ucn",
+    "security_by_capture_deletion"
+  ],
+  "boundary": {
+    "split_after_depth": 8,
+    "forward": "private_bottleneck_plus_formal_local_dp",
+    "backward": "separate_clipping_plus_formal_local_dp",
+    "cloud_receives_transform_secret": false,
+    "cloud_receives_public_and_folded_weight_pair": false,
+    "cloud_receives_canonical_activation": false,
+    "raw_capture_persistence": false
+  },
+  "mechanisms": {
+    "portable_full_width_orthogonal_ratchet": {"required": true, "status": "implemented_but_runtime_unvalidated", "version": "v2", "max_pairs_per_key": 64, "role": "auxiliary_known_plaintext_resistance"},
+    "strict_pair_budget": {"required": true, "status": "implemented_but_runtime_unvalidated", "oversized_forward": "fail"},
+    "bidirectional_boundary_obfuscation": {"required": true, "status": "implemented_but_runtime_unvalidated", "directions": ["forward", "backward"]},
+    "private_local_encoder": {"required": true, "status": "not_implemented"},
+    "learned_irreversible_bottleneck": {"required": true, "status": "not_implemented"},
+    "adversarial_representation_training": {"required": true, "status": "not_implemented"},
+    "forward_activation_ldp": {"required": true, "status": "not_implemented", "formal_accounting": true},
+    "backward_gradient_ldp": {"required": true, "status": "not_implemented", "formal_accounting": true},
+    "local_dp_sgd": {"required": true, "status": "implemented_but_runtime_unvalidated", "claim_scope": "local_parameter_updates_only"},
+    "prompt_template_randomization": {"required": true, "status": "implemented_but_runtime_unvalidated", "claim_scope": "auxiliary_known_plaintext_reduction"}
+  },
+  "data": {
+    "real_private_corpus_required": true,
+    "immutable_manifest_required": true,
+    "train_eval_hard_partition": true,
+    "minimum_eval_blocks": 2,
+    "synthetic_or_toy_claim_allowed": false
+  },
+  "execution": {
+    "model_class": "7B",
+    "repetitions": 5,
+    "matched_seeds": true,
+    "real_two_node_required": true,
+    "smoke_or_dry_run_claim_allowed": false,
+    "network_profiles": ["native", "rtt80", "hostile_wan"],
+    "one_workflow_per_node": true,
+    "resume_requires_manifest_match": true,
+    "protocol_downgrade": "fail",
+    "ratchet_version": "v2",
+    "oversized_ratchet_forward": "fail",
+    "missing_artifact": "fail"
+  },
+  "cells": [
+    {"id": "plain", "purpose": "unprotected negative control"},
+    {"id": "reversible_fold", "purpose": "current-defense negative control"},
+    {"id": "private_bottleneck", "purpose": "measure irreversible representation alone"},
+    {"id": "activation_ldp", "purpose": "measure formal boundary DP alone"},
+    {"id": "private_bottleneck_ldp", "purpose": "candidate production defense"}
+  ],
+  "required_attacks": [
+    "wire-eval",
+    "accumulation",
+    "known-prefix",
+    "stale-key",
+    "sharded",
+    "gradient-inversion",
+    "membership",
+    "alignment-search",
+    "active-cloud",
+    "subspace-joint",
+    "ica-bss",
+    "leak-accumulation",
+    "max-effort"
+  ],
+  "acceptance": {
+    "privacy_reference": "matched_label_free_control",
+    "max_recovery_excess_percentage_points": 2.0,
+    "confidence_level": 0.95,
+    "per_epoch_and_per_session_gate": true,
+    "max_mean_eval_loss_delta": 0.35,
+    "task_quality_gate_required": true,
+    "formal_dp_accountant_required": true,
+    "all_required_attacks_must_complete": true
+  },
+  "evidence": {
+    "safe_aggregate_json_only": true,
+    "provenance_required": true,
+    "forbidden": ["private_text", "keys", "seeds", "checkpoints", "raw_tensors", "pt", "bin"]
+  },
+  "blockers": [
+    "This v1 contract is superseded by split-training/production_v3/contract.json.",
+    "Remove the transform master from UCN and prevent a public-canonical/folded-weight pair; the current shared-seed fold is capture protection only, not compromised-UCN privacy.",
+    "Implement and utility-train a TLN-only irreversible bottleneck for the 7B split path.",
+    "Define adjacency, prove clipping sensitivity, calibrate noise, and add a composition accountant for forward activations.",
+    "Implement and account for a separate backward-gradient privacy boundary.",
+    "Integrate the live active-cloud attacker with UCN send/receive paths; the current framework has only an offline protocol and synthetic harness.",
+    "Run the recently added DP-SGD and prompt-randomization features on the real two-node path.",
+    "Add a production orchestrator that enforces manifests, matched cells, cleanup, evidence policy, and fail-closed acceptance."
+  ]
+}

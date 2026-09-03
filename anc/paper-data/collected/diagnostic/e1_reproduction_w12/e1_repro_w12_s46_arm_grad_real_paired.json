@@ -1,0 +1,121 @@
+{
+  "arms": [
+    {
+      "ci95_high_pp": 1.010435,
+      "ci95_low_pp": 0.482339,
+      "clusters": 2048,
+      "degenerate": false,
+      "modal_class_share": 0.673441,
+      "model": "coordinate_plus_invariants",
+      "paired_advantage_pp": 0.740404,
+      "resolves": true,
+      "restart": 0
+    },
+    {
+      "ci95_high_pp": 0.801945,
+      "ci95_low_pp": 0.267073,
+      "clusters": 2048,
+      "degenerate": false,
+      "modal_class_share": 0.652189,
+      "model": "coordinate_plus_invariants",
+      "paired_advantage_pp": 0.526816,
+      "resolves": true,
+      "restart": 1
+    },
+    {
+      "ci95_high_pp": 1.03015,
+      "ci95_low_pp": 0.574841,
+      "clusters": 2048,
+      "degenerate": false,
+      "modal_class_share": 0.501351,
+      "model": "coordinate_plus_invariants",
+      "paired_advantage_pp": 0.801757,
+      "resolves": true,
+      "restart": 2
+    },
+    {
+      "ci95_high_pp": 0.789626,
+      "ci95_low_pp": 0.262483,
+      "clusters": 2048,
+      "degenerate": false,
+      "modal_class_share": 0.564748,
+      "model": "invariant_only",
+      "paired_advantage_pp": 0.516848,
+      "resolves": true,
+      "restart": 0
+    },
+    {
+      "ci95_high_pp": 0.584037,
+      "ci95_low_pp": 0.050867,
+      "clusters": 2048,
+      "degenerate": false,
+      "modal_class_share": 0.571653,
+      "model": "invariant_only",
+      "paired_advantage_pp": 0.307808,
+      "resolves": true,
+      "restart": 1
+    },
+    {
+      "ci95_high_pp": 0.856012,
+      "ci95_low_pp": 0.387206,
+      "clusters": 2048,
+      "degenerate": false,
+      "modal_class_share": 0.513515,
+      "model": "invariant_only",
+      "paired_advantage_pp": 0.621097,
+      "resolves": true,
+      "restart": 2
+    },
+    {
+      "ci95_high_pp": 0.680832,
+      "ci95_low_pp": 0.147498,
+      "clusters": 2048,
+      "degenerate": false,
+      "modal_class_share": 0.550491,
+      "model": "invariant_graph",
+      "paired_advantage_pp": 0.408972,
+      "resolves": true,
+      "restart": 0
+    },
+    {
+      "ci95_high_pp": 1.010218,
+      "ci95_low_pp": 0.506271,
+      "clusters": 2048,
+      "degenerate": false,
+      "modal_class_share": 0.512978,
+      "model": "invariant_graph",
+      "paired_advantage_pp": 0.755065,
+      "resolves": true,
+      "restart": 1
+    },
+    {
+      "ci95_high_pp": 1.190774,
+      "ci95_low_pp": 0.704385,
+      "clusters": 2048,
+      "degenerate": false,
+      "modal_class_share": 0.43815,
+      "model": "invariant_graph",
+      "paired_advantage_pp": 0.936143,
+      "resolves": true,
+      "restart": 2
+    }
+  ],
+  "arms_degenerate_excluded": 0,
+  "arms_total": 9,
+  "best_eligible": {
+    "ci95_high_pp": 1.190774,
+    "ci95_low_pp": 0.704385,
+    "clusters": 2048,
+    "degenerate": false,
+    "modal_class_share": 0.43815,
+    "model": "invariant_graph",
+    "paired_advantage_pp": 0.936143,
+    "resolves": true,
+    "restart": 2
+  },
+  "bundle": "/workspace/experiments/results/training/e1_unprotected/bundles/e1_repro_w12_s46/grad_real.pt",
+  "clusters": 2048,
+  "control_class": 1154,
+  "schema": "dtraining.paired_advantage.v1",
+  "verdict": "resolves"
+}

@@ -1,0 +1,612 @@
+diff --git a/attacker/attacks/latent_probe.py b/attacker/attacks/latent_probe.py
+index 9daeed5..27f6481 100644
+--- a/attacker/attacks/latent_probe.py
++++ b/attacker/attacks/latent_probe.py
+@@ -34,6 +34,10 @@ def build_parser():
+     ap.add_argument("--batch-size", type=int, default=512)
+     ap.add_argument("--restarts", type=int, default=3)
+     ap.add_argument("--lr", type=float, default=1e-3)
++    ap.add_argument("--dump-eval-predictions",
++                    help="diagnostic only: .pt path for the per-arm eval "
++                         "argmax predictions. Scoring is untouched; nothing "
++                         "is collected unless this is set.")
+     return ap
+ 
+ 
+@@ -148,6 +152,8 @@ def run(args):
+     flat_train_y = train_classes.reshape(-1)
+     total = eval_y.numel()
+     all_scores = []
++    dump_path = getattr(args, "dump_eval_predictions", None)
++    dumped_arms = []
+     model_names = ("coordinate_plus_invariants", "invariant_only",
+                    "invariant_graph")
+     for model_index, model_name in enumerate(model_names):
+@@ -192,6 +198,9 @@ def run(args):
+             with torch.no_grad():
+                 prediction = model(eval_x).argmax(-1)
+                 correct = int(((prediction == eval_classes) & known_eval).sum())
++            if dump_path:
++                dumped_arms.append({"model": model_name, "restart": restart,
++                                    "prediction": prediction.clone()})
+             score = 100.0 * correct / total
+             upper = 100.0 * wilson_upper(
+                 correct, total, 0.05,
+@@ -220,6 +229,11 @@ def run(args):
+         "upper95_excess_over_majority_pp": worst_upper - majority_pct,
+         "known_eval_fraction": float(known_eval.float().mean()),
+     })
++    if dump_path:
++        torch.save({"schema": "dtraining.attacker.latent_probe_predictions.v1",
++                    "bundle": args.bundle, "classes": classes,
++                    "eval_tokens": eval_y, "known_eval": known_eval,
++                    "arms": dumped_arms}, dump_path)
+     artifacts.write_artifact(args.output, out)
+     return 0
+ 
+diff --git a/bin/run_latent_native_v5_06b.py b/bin/run_latent_native_v5_06b.py
+index 4d7c309..9b49518 100644
+--- a/bin/run_latent_native_v5_06b.py
++++ b/bin/run_latent_native_v5_06b.py
+@@ -9,6 +9,7 @@ and full /attacker evaluation.
+ """
+ from __future__ import annotations
+ import argparse
++import collections
+ import json
+ import math
+ import secrets
+@@ -30,7 +31,12 @@ from privacy_runtime.latent_protocol import RemoteLatentCloud
+ from privacy_runtime.ratchet_v2 import (
+     derive_gaussian_tensor, derive_permutation, derive_signs,
+ )
+-from split_trainer import make_layer_kwargs, run_layer_stack
++from split_trainer import (make_layer_kwargs, run_layer_stack,
++                           run_sublayer_stack)
++
++# A4: which residual sublayers of the delegated span the TRUSTED node keeps
++# when --delegate-sublayer names the sublayer that is delegated instead.
++TRUSTED_SUBLAYERS = {"mlp": ("attn",), "attn": ("mlp",)}
+ 
+ def mean(values):
+     return sum(values) / len(values) if values else float("nan")
+@@ -58,6 +64,15 @@ def main() -> int:
+     ap.add_argument("--clip-norm", type=float, default=1.0)
+     ap.add_argument("--split-after", type=int, default=15)
+     ap.add_argument("--resume-after", type=int, default=26)
++    ap.add_argument("--delegate-sublayer", choices=("full", "mlp", "attn"),
++                    default="full",
++                    help="A4: which residual sublayer of each delegated layer "
++                         "goes to the untrusted surrogate. 'full' (default) "
++                         "delegates whole layers and is the behaviour every "
++                         "committed artifact was produced with. 'mlp' keeps "
++                         "every delegated layer's attention sublayer on the "
++                         "trusted node and hands off after it; 'attn' is the "
++                         "mirror image")
+     ap.add_argument("--seq-len", type=int, default=32)
+     ap.add_argument("--train-blocks", type=int, default=16)
+     ap.add_argument("--eval-blocks", type=int, default=4)
+@@ -106,6 +121,33 @@ def main() -> int:
+                          "the gauge-invariant channel directly)")
+     ap.add_argument("--remote-grad-clip", type=float, default=1.0,
+                     help="TLN-side per-token clipping of UCN-returned input gradients")
++    ap.add_argument("--outbound-grad-dp", choices=("clip_noise", "off"),
++                    default="clip_noise",
++                    help="issue #105: protect the output gradient TLN sends "
++                         "to UCN on the same footing as the released "
++                         "forward frame (per-row clip to --grad-clip-norm "
++                         "plus calibrated Gaussian noise, counted as "
++                         "dp.releases.gradient). 'off' restores the "
++                         "unprotected, unaccounted backward wire every "
++                         "artifact before this fix was produced with")
++    ap.add_argument("--grad-clip-norm", type=float, default=0.01,
++                    help="per-row L2 bound on the outbound output gradient. "
++                         "Set near the median row norm, the DP-SGD "
++                         "convention: epsilon does not depend on it, utility "
++                         "does. The measured medians on this stack are "
++                         "0.0103 (10k steps / 256 blocks) and 0.0043 (40k "
++                         "steps / 4096 blocks), so re-calibrate per "
++                         "configuration and read back outbound_grad_dp in "
++                         "the artifact")
++    ap.add_argument("--grad-noise-multiplier", type=float,
++                    help="noise multiplier for the outbound output gradient "
++                         "(defaults to --noise-multiplier, so the backward "
++                         "wire carries the same sigma as the forward frame)")
++    ap.add_argument("--dp-account-untransmitted", action="store_true",
++                    help="count the post-training probe phase's encode calls "
++                         "as DP releases even though they never reach UCN. "
++                         "Wrong, and on only to reproduce artifacts written "
++                         "before issue #105")
+     ap.add_argument("--bundle-canonical-fraction", type=float, default=0.0,
+                     help="sensitivity analysis ONLY: also store the pre-gauge "
+                          "canonical latent rows for this fraction of blocks, "
+@@ -118,6 +160,17 @@ def main() -> int:
+                     help="adaptive attacker optimizer updates per defender step")
+     ap.add_argument("--attacker-bundle",
+                     help="temporary trusted .pt bundle for python -m attacker --attack latent-probe")
++    ap.add_argument("--grad-channel-bundle",
++                    help="threat-model scope audit ONLY: record the raw "
++                         "TLN->UCN output gradients (the outbound backward "
++                         "wire, run_latent_native_v5_06b.py:660) together with "
++                         "the matched forward frame and wire-order labels. "
++                         "Inert unless passed; changes no RNG draw and no "
++                         "reported key")
++    ap.add_argument("--grad-channel-frames", type=int, default=512,
++                    help="how many of the FINAL training frames "
++                         "--grad-channel-bundle retains (a ring buffer, so the "
++                         "recorded window is the most-converged one)")
+     ap.add_argument("--cloud-url",
+                     help="remote latent-only UCN server, e.g. ws://ucn:5013")
+     ap.add_argument("--cloud-tls-ca",
+@@ -153,6 +206,12 @@ def main() -> int:
+     args = ap.parse_args()
+     if args.noise_multiplier <= 0:
+         raise ValueError("noise multiplier must be positive")
++    grad_dp_on = args.outbound_grad_dp != "off"
++    grad_noise_multiplier = (args.grad_noise_multiplier
++                             if args.grad_noise_multiplier is not None
++                             else args.noise_multiplier)
++    if grad_dp_on and (args.grad_clip_norm <= 0 or grad_noise_multiplier <= 0):
++        raise ValueError("outbound gradient clip and noise must be positive")
+     if ((args.secret_wire_rotation or args.secret_token_permutation)
+             and args.cloud_kind not in ("equivariant", "monomial",
+                                         "monomial_moe",
+@@ -246,7 +305,10 @@ def main() -> int:
+         cloud_heads=4, clip_norm=args.clip_norm,
+         noise_multiplier=args.noise_multiplier,
+         adversary_strength=args.adversary_strength,
+-        cloud_kind=args.cloud_kind, cloud_experts=args.cloud_experts)
++        cloud_kind=args.cloud_kind, cloud_experts=args.cloud_experts,
++        gradient_clip_norm=args.grad_clip_norm if grad_dp_on else None,
++        gradient_noise_multiplier=(grad_noise_multiplier if grad_dp_on
++                                   else None))
+     tln, ucn, attackers = build_latent_native_split(
+         cfg, vocab_size=len(attack_class_tokens))
+     assert_ucn_latent_only(ucn, args.latent_dim, hidden_dim)
+@@ -360,10 +422,18 @@ def main() -> int:
+                                        type("Args", (), {"attn_impl": "sdpa"})())
+             prefix = run_layer_stack(layers[:args.split_after + 1], hidden,
+                                      kwargs)
+-            middle = (run_layer_stack(
+-                layers[args.split_after + 1:args.resume_after], prefix, kwargs)
+-                if include_teacher else None)
+-        return prefix.float(), (middle.float() if middle is not None else None), positions
++            delegated = layers[args.split_after + 1:args.resume_after]
++            # A4: with a sublayer mode the trusted node also runs the sublayer
++            # it kept, and hands off from there; the teacher stays the true
++            # delegated-span output, so a perfect surrogate still recovers the
++            # undefended model.  'full' returns `prefix` itself, untouched.
++            handoff = (prefix if args.delegate_sublayer == "full"
++                       else run_sublayer_stack(
++                           delegated, prefix, kwargs,
++                           TRUSTED_SUBLAYERS[args.delegate_sublayer]))
++            middle = (run_layer_stack(delegated, prefix, kwargs)
++                      if include_teacher else None)
++        return handoff.float(), (middle.float() if middle is not None else None), positions
+ 
+     def tail_loss(middle_float, positions, labels):
+         hidden = middle_float.to(dtype)
+@@ -441,6 +511,51 @@ def main() -> int:
+         scales = (args.remote_grad_clip / norms.clamp_min(1e-12)).clamp(max=1.0)
+         return (flat * scales).reshape_as(value).to(value.dtype)
+ 
++    # Issue #105: what the outbound backward wire cost, read back from the
++    # protection itself so a run reports whether its clip was calibrated.
++    grad_dp = {"frames": 0, "rows": 0, "clip_scale_sum": 0.0,
++               "max_preclip_norm": 0.0}
++
++    def outbound_gradient(gradient, nonce: str):
++        """The exact tensor that leaves TLN on the backward path.
++
++        Protection first, wire format last, mirroring the forward path
++        (encode -> gauge -> quantize).  Every wire row is clipped and noised,
++        chaff rows included, so the zero support that used to disclose the
++        real/decoy partition no longer exists.
++        """
++        if not grad_dp_on:
++            return quantize_wire(gradient)
++        protected, meta = tln.protect_gradient(gradient, nonce)
++        grad_dp["frames"] += 1
++        grad_dp["rows"] += int(meta["token_releases"])
++        grad_dp["clip_scale_sum"] += float(meta["mean_clip_scale"])
++        grad_dp["max_preclip_norm"] = max(grad_dp["max_preclip_norm"],
++                                          float(meta["max_preclip_norm"]))
++        return quantize_wire(protected)
++
++    def wire_real_mask(release_meta, n_wire):
++        """Wire-order mask, True where the row is a real corpus token.
++
++        Audit helper: it reads only trusted-side release metadata, exactly as
++        attack_targets does for labels, and is used to measure whether the
++        outbound gradient's zero pattern discloses the chaff partition.
++        """
++        mask = torch.zeros(n_wire, dtype=torch.bool, device=device)
++        mask[:int(release_meta["n_real"])] = True
++        permutation = release_meta["permutation"]
++        return (mask if permutation is None else mask[permutation]).cpu()
++
++    def record_grad_channel(wire, grad, labels, release_meta, step):
++        """Retain one frame of the real outbound backward wire (audit only)."""
++        grad_channel.append({
++            "wire": wire.detach().float().cpu(),
++            "grad": grad.detach().float().cpu(),
++            "tokens": labels.detach().cpu(),
++            "is_real": wire_real_mask(release_meta, wire.shape[-2]),
++            "step": int(step),
++        })
++
+     # Byzantine verification state (verify mode): one gauged frame is
+     # broadcast to identically-seeded replicas; TLN compares restored
+     # returns, uses the coordinate-wise median, and counts deviations.
+@@ -476,6 +591,10 @@ def main() -> int:
+     baseline_eval_seconds = time.perf_counter() - baseline_started
+ 
+     train_metrics = []
++    # Threat-model scope audit: a ring buffer over the outbound backward wire.
++    # Empty and never written unless --grad-channel-bundle is passed.
++    grad_channel = (collections.deque(maxlen=max(1, args.grad_channel_frames))
++                    if args.grad_channel_bundle else None)
+     started = time.perf_counter()
+     # E5: optional public-data phase first (same protocol, gauges, chaff —
+     # uniform exposure; the phase simply does not need privacy).  The private
+@@ -619,10 +738,9 @@ def main() -> int:
+             # Lockstep replicas: every node receives the same (mean) output
+             # gradient; identical inputs + identical gradients keep the
+             # replicas identical, so any later deviation is a tamper signal.
+-            mean_grad = torch.stack(
+-                [path[0].grad for path in cloud_paths]).mean(dim=0)
+-            if args.wire_quant != "none":
+-                mean_grad = quantize_wire(mean_grad)
++            mean_grad = outbound_gradient(
++                torch.stack([path[0].grad for path in cloud_paths]).mean(
++                    dim=0), nonce)
+             input_grads = []
+             for cloud_k, mb_k, chan in cloud_paths:
+                 input_grads.append(clip_remote_gradient(
+@@ -635,8 +753,10 @@ def main() -> int:
+                              meta_k) in enumerate(cloud_paths):
+                 if not torch.isfinite(cloud_k.grad).all():
+                     raise RuntimeError("non-finite gradient at cloud output")
+-                send_grad = (quantize_wire(cloud_k.grad)
+-                             if args.wire_quant != "none" else cloud_k.grad)
++                send_grad = outbound_gradient(cloud_k.grad, nonce)
++                if grad_channel is not None and path_index == 0:
++                    record_grad_channel(rel_k, send_grad, attack_token_labels,
++                                        meta_k, global_step)
+                 remote_input_grad = chan.backward(mb_k, send_grad)
+                 # All channels share the encoder subgraph: retain it until
+                 # the last channel's backward has run.
+@@ -660,6 +780,30 @@ def main() -> int:
+         torch.cuda.synchronize()
+     train_seconds = time.perf_counter() - started
+ 
++    if grad_channel is not None:
++        if not grad_channel:
++            raise RuntimeError("--grad-channel-bundle needs a remote cloud "
++                               "training path; nothing was recorded")
++        grad_path = Path(args.grad_channel_bundle)
++        grad_path.parent.mkdir(parents=True, exist_ok=True)
++        torch.save({
++            "schema": "dtraining.outbound_grad_channel.v1",
++            "wire": torch.cat([f["wire"] for f in grad_channel], dim=0),
++            "grad": torch.cat([f["grad"] for f in grad_channel], dim=0),
++            "tokens": torch.cat([f["tokens"] for f in grad_channel], dim=0),
++            "is_real": torch.stack([f["is_real"] for f in grad_channel]),
++            "frame_steps": torch.tensor([f["step"] for f in grad_channel]),
++            "train_blocks": len(train_blocks), "seq_len": args.seq_len,
++            "chaff_tokens": args.chaff_tokens, "wire_quant": args.wire_quant,
++            "remote_grad_clip": args.remote_grad_clip,
++            "noise_multiplier": args.noise_multiplier,
++            "outbound_grad_dp": args.outbound_grad_dp,
++            "grad_clip_norm": args.grad_clip_norm if grad_dp_on else None,
++            "grad_noise_multiplier": (grad_noise_multiplier if grad_dp_on
++                                      else None),
++            "split_after": args.split_after, "steps": args.steps,
++        }, grad_path)
++
+     # Evaluate protected utility and collect detached, held-out latent rows.
+     candidate_losses, zero_cloud_losses = [], []
+     held_latents, held_labels, held_prefix = [], [], []
+@@ -765,6 +909,7 @@ def main() -> int:
+     # Fresh post-training token attacker: train on train blocks, evaluate only
+     # on the disjoint held-out blocks. No canonical eval labels enter training.
+     probe_recoveries = []
++    untransmitted = {"calls": 0, "rows": 0}
+     bundle_train_views, bundle_train_labels = [], []
+     total_rows = sum(labels.numel() for labels in held_labels)
+     for probe_restart in range(args.probe_restarts):
+@@ -784,7 +929,16 @@ def main() -> int:
+                                 if remote and args.fragment_channels == 1
+                                 else 1)
+             with torch.no_grad():
+-                latent, _ = tln.encode(prefix, secrets.token_hex(16))
++                # Issue #105: this phase re-derives a released view from the
++                # frozen encoder and never calls chan.forward, so nothing
++                # crosses the boundary and nothing may be charged for it.
++                latent, probe_meta = tln.encode(
++                    prefix, secrets.token_hex(16),
++                    transmitted=args.dp_account_untransmitted)
++                untransmitted["calls"] += int(not args.dp_account_untransmitted)
++                untransmitted["rows"] += int(
++                    probe_meta["token_releases"]
++                    * (not args.dp_account_untransmitted))
+                 if (args.bundle_canonical_fraction > 0
+                         and float(torch.rand((), generator=canonical_gen))
+                         < args.bundle_canonical_fraction):
+@@ -970,6 +1124,37 @@ def main() -> int:
+             "fresh probe is a diagnostic subset, not the complete /attacker suite"
+         ]
+     }
++    if grad_dp_on:
++        # Emitted only when engaged, like delegate_sublayer below, so that
++        # --outbound-grad-dp off keeps the exact key set of every artifact
++        # written before issue #105.
++        result["outbound_grad_dp"] = {
++            "mode": args.outbound_grad_dp,
++            "clip_norm": args.grad_clip_norm,
++            "noise_multiplier": grad_noise_multiplier,
++            "noise_std": grad_noise_multiplier * args.grad_clip_norm,
++            "protected_frames": grad_dp["frames"],
++            "protected_rows": grad_dp["rows"],
++            "mean_clip_scale": (grad_dp["clip_scale_sum"] / grad_dp["frames"]
++                                if grad_dp["frames"] else None),
++            "max_preclip_row_norm": grad_dp["max_preclip_norm"],
++        }
++    if not args.dp_account_untransmitted:
++        result["dp_untransmitted_releases_excluded"] = {
++            "site": "post-training probe phase: tln.encode with no "
++                    "chan.forward, run_latent_native_v5_06b.py:931",
++            "encode_calls": untransmitted["calls"],
++            "rows": untransmitted["rows"],
++        }
++    if args.delegate_sublayer != "full":
++        # Emitted only when engaged, on purpose: a default run keeps the exact
++        # key set of every committed artifact, and bin/deleg6040_config_diff.py
++        # gates absent-vs-present as a CONFIG violation.
++        result["delegate_sublayer"] = args.delegate_sublayer
++        result["limitations"].append(
++            "sublayer delegation: one channel crossing per block, so the "
++            "trusted sublayers run on a trajectory that omits the delegated "
++            "sublayers; not the interleaved per-sublayer protocol")
+     output = Path(args.output)
+     output.parent.mkdir(parents=True, exist_ok=True)
+     output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+diff --git a/privacy_runtime/activation_dp.py b/privacy_runtime/activation_dp.py
+index 037210e..9abfe8b 100644
+--- a/privacy_runtime/activation_dp.py
++++ b/privacy_runtime/activation_dp.py
+@@ -30,15 +30,18 @@ def noise_for_rho(releases: int, rho: float,
+ 
+ 
+ class BoundaryDPAccountant:
+-    def __init__(self, delta: float, adjacency: str = "replace_one"):
++    def __init__(self, delta: float, adjacency: str = "replace_one",
++                 directions: tuple[str, ...] = ("forward", "return")):
+         if not 0.0 < delta < 1.0:
+             raise ValueError("delta must be in (0, 1)")
+         if adjacency not in ("replace_one", "add_remove"):
+             raise ValueError("unsupported adjacency")
++        if not directions:
++            raise ValueError("at least one accounted direction is required")
+         self.delta = float(delta)
+         self.adjacency = adjacency
+-        self.releases = {"forward": 0, "return": 0}
+-        self.rho = {"forward": 0.0, "return": 0.0}
++        self.releases = {name: 0 for name in directions}
++        self.rho = {name: 0.0 for name in directions}
+ 
+     @property
+     def sensitivity_multiplier(self) -> float:
+@@ -47,7 +50,8 @@ class BoundaryDPAccountant:
+     def record(self, direction: str, noise_multiplier: float,
+                releases: int = 1) -> None:
+         if direction not in self.releases:
+-            raise ValueError("direction must be forward or return")
++            raise ValueError(
++                f"direction must be one of {sorted(self.releases)}")
+         if noise_multiplier <= 0 or releases <= 0:
+             raise ValueError("noise_multiplier and releases must be positive")
+         sensitivity = self.sensitivity_multiplier
+@@ -69,17 +73,14 @@ class BoundaryDPAccountant:
+             "delta": self.delta,
+             "releases": dict(self.releases),
+             "rho": dict(self.rho),
+-            "epsilon": {
+-                "forward": self.epsilon("forward"),
+-                "return": self.epsilon("return"),
+-                "composed": self.epsilon(),
+-            },
++            "epsilon": {**{name: self.epsilon(name) for name in self.rho},
++                        "composed": self.epsilon()},
+         }
+ 
+ 
+ def clip_and_noise(tensor, max_norm: float, noise_multiplier: float,
+                    accountant: BoundaryDPAccountant, direction: str,
+-                   generator=None):
++                   generator=None, account: bool = True):
+     """Clip each batch item and add calibrated Gaussian noise.
+ 
+     Each final-dimension row is one token-level privacy vector. This matches
+@@ -87,6 +88,10 @@ def clip_and_noise(tensor, max_norm: float, noise_multiplier: float,
+     counted as one release while exposing many independently labelled rows.
+     The function requires torch at call time but keeps this module importable
+     in lightweight gates.
++
++    ``account=False`` protects the tensor without charging the budget, and is
++    for trusted-side re-derivations that never cross the boundary: a release
++    is a crossing, so counting one that never happened misstates the budget.
+     """
+     import torch
+ 
+@@ -102,7 +107,8 @@ def clip_and_noise(tensor, max_norm: float, noise_multiplier: float,
+                         device=clipped.device, generator=generator)
+     protected = clipped + noise * (noise_multiplier * max_norm)
+     releases = int(flat.shape[0])
+-    accountant.record(direction, noise_multiplier, releases=releases)
++    if account:
++        accountant.record(direction, noise_multiplier, releases=releases)
+     return protected.to(dtype=tensor.dtype), {
+         "max_preclip_norm": float(norms.max().item()),
+         "mean_clip_scale": float(scales.mean().item()),
+@@ -113,23 +119,48 @@ def clip_and_noise(tensor, max_norm: float, noise_multiplier: float,
+ 
+ 
+ class BidirectionalBoundaryDP:
++    """Forward and return boundary DP, plus an optional outbound-gradient leg.
++
++    ``gradient_clip``/``gradient_noise`` declare the third direction: the
++    output gradient the trusted node sends to the untrusted node during
++    training.  Left unset the object is exactly the two-direction accountant
++    every committed artifact was produced with, key for key.
++    """
++
+     def __init__(self, forward_clip: float, forward_noise: float,
+                  return_clip: float, return_noise: float, delta: float,
+-                 adjacency: str = "replace_one"):
++                 adjacency: str = "replace_one",
++                 gradient_clip: float | None = None,
++                 gradient_noise: float | None = None):
++        if (gradient_clip is None) != (gradient_noise is None):
++            raise ValueError("gradient clip and noise must be set together")
+         self.forward_clip = float(forward_clip)
+         self.forward_noise = float(forward_noise)
+         self.return_clip = float(return_clip)
+         self.return_noise = float(return_noise)
+-        self.accountant = BoundaryDPAccountant(delta, adjacency)
+-
+-    def protect_forward(self, tensor, generator=None):
++        self.gradient_clip = (None if gradient_clip is None
++                              else float(gradient_clip))
++        self.gradient_noise = (None if gradient_noise is None
++                               else float(gradient_noise))
++        directions = ("forward", "return") if self.gradient_clip is None \
++            else ("forward", "return", "gradient")
++        self.accountant = BoundaryDPAccountant(delta, adjacency, directions)
++
++    def protect_forward(self, tensor, generator=None, account: bool = True):
+         return clip_and_noise(tensor, self.forward_clip, self.forward_noise,
+-                              self.accountant, "forward", generator)
++                              self.accountant, "forward", generator, account)
+ 
+     def protect_return(self, tensor, generator=None):
+         return clip_and_noise(tensor, self.return_clip, self.return_noise,
+                               self.accountant, "return", generator)
+ 
++    def protect_gradient(self, tensor, generator=None):
++        """Clip and noise the output gradient that leaves the trusted node."""
++        if self.gradient_clip is None:
++            raise RuntimeError("gradient direction was not declared")
++        return clip_and_noise(tensor, self.gradient_clip, self.gradient_noise,
++                              self.accountant, "gradient", generator)
++
+     def report(self) -> dict:
+         result = self.accountant.report()
+         result["parameters"] = {
+@@ -138,4 +169,8 @@ class BidirectionalBoundaryDP:
+             "return_clip": self.return_clip,
+             "return_noise_multiplier": self.return_noise,
+         }
++        if self.gradient_clip is not None:
++            result["parameters"]["gradient_clip"] = self.gradient_clip
++            result["parameters"]["gradient_noise_multiplier"] = \
++                self.gradient_noise
+         return result
+diff --git a/privacy_runtime/latent_native.py b/privacy_runtime/latent_native.py
+index d0d5e52..45f7ed9 100644
+--- a/privacy_runtime/latent_native.py
++++ b/privacy_runtime/latent_native.py
+@@ -30,10 +30,21 @@ class LatentPrivacyConfig:
+     adversary_strength: float = 0.25
+     cloud_kind: str = "transformer"
+     cloud_experts: int = 1
++    # Outbound output-gradient DP (issue #105).  Unset = the unprotected,
++    # unaccounted backward wire every pre-fix artifact was produced with.
++    gradient_clip_norm: float | None = None
++    gradient_noise_multiplier: float | None = None
+ 
+     def validate(self) -> None:
+         if not 0 < self.latent_dim < self.hidden_dim:
+             raise ValueError("latent_dim must be smaller than hidden_dim")
++        if (self.gradient_clip_norm is None) != (
++                self.gradient_noise_multiplier is None):
++            raise ValueError("gradient clip and noise must be set together")
++        if self.gradient_clip_norm is not None and (
++                self.gradient_clip_norm <= 0
++                or self.gradient_noise_multiplier <= 0):
++            raise ValueError("gradient clip and noise must be positive")
+         if self.latent_dim % self.cloud_heads:
+             raise ValueError("latent_dim must be divisible by cloud_heads")
+         if self.cloud_layers <= 0:
+@@ -464,15 +475,32 @@ def build_latent_native_split(config: LatentPrivacyConfig, vocab_size: int,
+             self.dp = BidirectionalBoundaryDP(
+                 config.clip_norm, config.noise_multiplier,
+                 config.clip_norm, config.noise_multiplier, config.delta,
++                gradient_clip=config.gradient_clip_norm,
++                gradient_noise=config.gradient_noise_multiplier,
+             )
+             self.nonces = ReplayResistantSampler(1)
+             self.ratchet = LatentRatchet(d)
+ 
+-        def encode(self, hidden, nonce: str):
++        def encode(self, hidden, nonce: str, transmitted: bool = True):
++            """Protect a latent for release.  ``transmitted=False`` marks a
++            trusted-side re-derivation that never reaches UCN, so it is
++            protected but not charged to the budget."""
+             self.nonces.accept_nonce(nonce)
+             latent = self.encoder(hidden)
+             return self.dp.protect_forward(
+-                latent, _request_generator(latent, nonce + ":forward"))
++                latent, _request_generator(latent, nonce + ":forward"),
++                account=transmitted)
++
++        def protect_gradient(self, gradient, nonce: str):
++            """Clip and noise the output gradient sent back to UCN.
++
++            Runs on the trusted side before the tensor leaves the process, so
++            the untrusted node never sees the raw pullback.  Every wire row is
++            protected, chaff included: a chaff row's raw gradient is
++            identically zero, which is what disclosed the real/decoy partition
++            (docs/experiments/THREAT_MODEL_SCOPE_AUDIT.md 5.3)."""
++            return self.dp.protect_gradient(
++                gradient, _request_generator(gradient, nonce + ":gradient"))
+ 
+         def decode(self, latent, nonce: str, residual=None):
+             protected, metadata = self.dp.protect_return(
+diff --git a/split-training/split_trainer.py b/split-training/split_trainer.py
+index c3fe47a..d991294 100644
+--- a/split-training/split_trainer.py
++++ b/split-training/split_trainer.py
+@@ -820,6 +820,32 @@ def run_layer_stack(layers, hidden, layer_kwargs):
+     return hidden
+ 
+ 
++def run_sublayer_stack(layers, hidden, layer_kwargs, sublayers: tuple):
++    """Run only the named residual sublayers of each decoder layer, in order.
++
++    A Qwen3 decoder layer is two residual sublayers and nothing else:
++
++        hidden = hidden + self_attn(input_layernorm(hidden))            "attn"
++        hidden = hidden + mlp(post_attention_layernorm(hidden))         "mlp"
++
++    so `sublayers=("attn", "mlp")` reproduces `run_layer_stack` exactly and
++    either name alone runs half of every layer.  The layernorms are pre-norm
++    and each sublayer owns its own, so dropping one sublayer must also drop
++    that sublayer's layernorm -- keeping it would apply a norm the residual
++    stream never sees in the reference model.
++    """
++    if not sublayers or not set(sublayers) <= {"attn", "mlp"}:
++        raise ValueError("sublayers must be a non-empty subset of (attn, mlp)")
++    for layer in layers:
++        if "attn" in sublayers:
++            out = layer.self_attn(hidden_states=layer.input_layernorm(hidden),
++                                  **layer_kwargs)
++            hidden = hidden + (out[0] if isinstance(out, tuple) else out)
++        if "mlp" in sublayers:
++            hidden = hidden + layer.mlp(layer.post_attention_layernorm(hidden))
++    return hidden
++
++
+ def main():
+     ap = argparse.ArgumentParser(description=__doc__,
+                                  formatter_class=argparse.RawDescriptionHelpFormatter)

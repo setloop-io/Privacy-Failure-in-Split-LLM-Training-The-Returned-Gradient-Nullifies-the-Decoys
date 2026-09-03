@@ -1,0 +1,160 @@
+{
+  "bundles": {
+    "grad_all": {
+      "eval_blocks": [
+        2048,
+        80,
+        64
+      ],
+      "eval_rows": 163840,
+      "path": "/workspace/experiments/results/training/e1_unprotected/bundles/e1_repro_w12_s43/grad_all.pt",
+      "train_blocks": [
+        2048,
+        80,
+        64
+      ]
+    },
+    "grad_real": {
+      "eval_blocks": [
+        2048,
+        32,
+        64
+      ],
+      "eval_rows": 65536,
+      "path": "/workspace/experiments/results/training/e1_unprotected/bundles/e1_repro_w12_s43/grad_real.pt",
+      "train_blocks": [
+        2048,
+        32,
+        64
+      ]
+    },
+    "grad_real_shuffled": {
+      "eval_blocks": [
+        2048,
+        32,
+        64
+      ],
+      "eval_rows": 65536,
+      "path": "/workspace/experiments/results/training/e1_unprotected/bundles/e1_repro_w12_s43/grad_real_shuffled.pt",
+      "train_blocks": [
+        2048,
+        32,
+        64
+      ]
+    },
+    "grad_shuffled": {
+      "eval_blocks": [
+        2048,
+        80,
+        64
+      ],
+      "eval_rows": 163840,
+      "path": "/workspace/experiments/results/training/e1_unprotected/bundles/e1_repro_w12_s43/grad_shuffled.pt",
+      "train_blocks": [
+        2048,
+        80,
+        64
+      ]
+    },
+    "joint_real": {
+      "eval_blocks": [
+        2048,
+        32,
+        128
+      ],
+      "eval_rows": 65536,
+      "path": "/workspace/experiments/results/training/e1_unprotected/bundles/e1_repro_w12_s43/joint_real.pt",
+      "train_blocks": [
+        2048,
+        32,
+        128
+      ]
+    },
+    "joint_real_scaled": {
+      "eval_blocks": [
+        2048,
+        32,
+        128
+      ],
+      "eval_rows": 65536,
+      "path": "/workspace/experiments/results/training/e1_unprotected/bundles/e1_repro_w12_s43/joint_real_scaled.pt",
+      "train_blocks": [
+        2048,
+        32,
+        128
+      ]
+    },
+    "wire_all": {
+      "eval_blocks": [
+        2048,
+        80,
+        64
+      ],
+      "eval_rows": 163840,
+      "path": "/workspace/experiments/results/training/e1_unprotected/bundles/e1_repro_w12_s43/wire_all.pt",
+      "train_blocks": [
+        2048,
+        80,
+        64
+      ]
+    },
+    "wire_real": {
+      "eval_blocks": [
+        2048,
+        32,
+        64
+      ],
+      "eval_rows": 65536,
+      "path": "/workspace/experiments/results/training/e1_unprotected/bundles/e1_repro_w12_s43/wire_real.pt",
+      "train_blocks": [
+        2048,
+        32,
+        64
+      ]
+    }
+  },
+  "capture": "/workspace/experiments/results/training/e1_unprotected/bundles/e1_repro_w12_s43_gradchannel.pt",
+  "config": {
+    "chaff_tokens": 48,
+    "grad_clip_norm": null,
+    "grad_noise_multiplier": null,
+    "noise_multiplier": 0.35,
+    "outbound_grad_dp": "off",
+    "remote_grad_clip": 1.0,
+    "seq_len": 32,
+    "split_after": 14,
+    "steps": 40000,
+    "train_blocks": 4096,
+    "wire_quant": "none"
+  },
+  "magnitudes": {
+    "outbound_forward_frame_rows": {
+      "max": 4.284780502319336,
+      "mean": 2.9605839252471924,
+      "median": 2.957212448120117,
+      "min": 1.8699226379394531,
+      "p95": 3.3950490951538086,
+      "rows": 327680
+    },
+    "outbound_output_gradient_rows": {
+      "max": 0.2001943588256836,
+      "mean": 0.005776325706392527,
+      "median": 0.003847931046038866,
+      "min": 7.302290759980679e-05,
+      "p95": 0.016565658152103424,
+      "rows": 131072
+    }
+  },
+  "schema": "dtraining.grad_channel_bundles.v1",
+  "support_leak": {
+    "frames": 4096,
+    "frames_with_exact_agreement": 4096,
+    "frames_with_exact_agreement_pct": 100.0,
+    "nonzero_rows_per_frame_max": 32,
+    "nonzero_rows_per_frame_min": 32,
+    "real_rows_per_frame": 32,
+    "row_agreement_zero_support_vs_real": 1.0,
+    "rows_per_frame": 80
+  },
+  "unique_blocks": false
+}

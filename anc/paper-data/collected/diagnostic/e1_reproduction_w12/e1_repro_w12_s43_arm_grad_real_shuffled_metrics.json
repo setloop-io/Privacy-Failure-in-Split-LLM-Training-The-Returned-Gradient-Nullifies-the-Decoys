@@ -1,0 +1,98 @@
+{
+  "bundle": "/workspace/experiments/results/training/e1_unprotected/bundles/e1_repro_w12_s43/grad_real_shuffled.pt",
+  "control_class": 279,
+  "control_recovery_pct": {
+    "rare_token_top1": 0.0
+  },
+  "degenerate_control_subsets": [
+    "rare_token_top1"
+  ],
+  "mean_advantage_by_probe": {
+    "membership_auc": {
+      "coordinate_plus_invariants#0": -0.0037890076637268066,
+      "coordinate_plus_invariants#1": -0.0009478330612182617,
+      "coordinate_plus_invariants#2": -0.000708460807800293,
+      "invariant_graph#0": 0.0006707906723022461,
+      "invariant_graph#1": -0.004785120487213135,
+      "invariant_graph#2": -0.007742345333099365,
+      "invariant_only#0": -0.00553053617477417,
+      "invariant_only#1": -0.00859379768371582,
+      "invariant_only#2": -0.0067484378814697266
+    },
+    "rare_token_top1": {
+      "coordinate_plus_invariants#0": 0.0,
+      "coordinate_plus_invariants#1": 0.0,
+      "coordinate_plus_invariants#2": 0.0,
+      "invariant_graph#0": 0.0,
+      "invariant_graph#1": 0.0,
+      "invariant_graph#2": 0.0,
+      "invariant_only#0": 0.0,
+      "invariant_only#1": 0.0,
+      "invariant_only#2": 0.0
+    },
+    "token_cross_entropy": {
+      "coordinate_plus_invariants#0": 2.6463493956252933,
+      "coordinate_plus_invariants#1": 2.6769466681871563,
+      "coordinate_plus_invariants#2": 2.703251223778352,
+      "invariant_graph#0": 2.8653093746397644,
+      "invariant_graph#1": 2.7945114127360284,
+      "invariant_graph#2": 2.8127241546753794,
+      "invariant_only#0": 2.9818444247357547,
+      "invariant_only#1": 3.086148160742596,
+      "invariant_only#2": 3.039646580349654
+    },
+    "token_top1": {
+      "coordinate_plus_invariants#0": -0.08365771591411028,
+      "coordinate_plus_invariants#1": -0.08920046233865245,
+      "coordinate_plus_invariants#2": -0.21339405835810804,
+      "invariant_graph#0": -0.20959240645380084,
+      "invariant_graph#1": -0.2255853434909401,
+      "invariant_graph#2": -0.21910893864404493,
+      "invariant_only#0": -0.06424184398796219,
+      "invariant_only#1": -0.023106928279749427,
+      "invariant_only#2": -0.11565658954936157
+    }
+  },
+  "metrics_computed": [
+    "membership_auc",
+    "rare_token_top1",
+    "token_cross_entropy",
+    "token_top1"
+  ],
+  "metrics_unavailable": {
+    "property_auc": "Needs property labels per row.",
+    "response_side_recovery": "Needs response-side capture. The transcript protocol records the forward and backward wire, not the response.",
+    "semantic_recovery": "No similarity measure has been chosen. PLAN.md W2.6 records this as an open item that must be named before freeze.",
+    "sequence_exact_match": "Released rows carry a fresh token permutation, so the sequence order is not recoverable from the dump. Needs the trusted-side permutation, which is correctly sealed away."
+  },
+  "rare_rows": 3902,
+  "rare_token_percentile": 50.0,
+  "raw_recovery_pct_by_probe": {
+    "rare_token_top1": {
+      "coordinate_plus_invariants#0": 0.0,
+      "coordinate_plus_invariants#1": 0.0,
+      "coordinate_plus_invariants#2": 0.0,
+      "invariant_graph#0": 0.0,
+      "invariant_graph#1": 0.0,
+      "invariant_graph#2": 0.0,
+      "invariant_only#0": 0.0,
+      "invariant_only#1": 0.0,
+      "invariant_only#2": 0.0
+    },
+    "token_top1": {
+      "coordinate_plus_invariants#0": 4.881956018705805,
+      "coordinate_plus_invariants#1": 4.873865272900856,
+      "coordinate_plus_invariants#2": 4.7460314891826725,
+      "invariant_graph#0": 4.754122234987621,
+      "invariant_graph#1": 4.7444133400216835,
+      "invariant_graph#2": 4.742795190860694,
+      "invariant_only#0": 4.90137380863768,
+      "invariant_only#1": 4.940209388501432,
+      "invariant_only#2": 4.849593035486011
+    }
+  },
+  "reading_note": "On a subset where control_recovery_pct is 0, the paired advantage equals the raw recovery rate. A +0.0000 advantage there means nothing was recovered, not that the arm matched the control. membership_auc values are AUC - 0.5, so 0.0 is the constant-control floor.",
+  "record_count": 71325,
+  "schema": "dtraining.leakage_metrics.v1",
+  "scoreable_rows": 61799
+}

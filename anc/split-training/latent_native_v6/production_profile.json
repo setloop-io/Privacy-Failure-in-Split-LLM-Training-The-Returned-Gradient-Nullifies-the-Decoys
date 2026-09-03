@@ -1,0 +1,51 @@
+{
+  "version": "latent-native-v6",
+  "launchable": false,
+  "best_empirical_candidate": true,
+  "threat_model": {
+    "tln": "trusted",
+    "ucn": "fully_compromised",
+    "cryptographic_confidentiality": false,
+    "tee": false
+  },
+  "topology": {
+    "model": "Qwen3-0.6B",
+    "split_after": 21,
+    "resume_after": 26,
+    "approximated_middle_layers": 4,
+    "hidden_width": 1024,
+    "wire_width": 16,
+    "cloud_trainable_parameters": 5
+  },
+  "mechanisms": {
+    "fresh_coordinate_rotation": true,
+    "fresh_token_permutation": true,
+    "fresh_signed_lognormal_token_gauge": true,
+    "monomial_equivariant_cloud": true,
+    "forward_return_clip": 1.0,
+    "forward_return_noise_multiplier": 0.35,
+    "tln_remote_gradient_clip": 1.0,
+    "cloud_state_isolated_per_connection": true,
+    "bounded_batch_coalescing": 64,
+    "real_attacker_arms": [
+      "coordinate_plus_invariants",
+      "invariant_only",
+      "invariant_graph"
+    ]
+  },
+  "empirical_gates": {
+    "three_isolated_seeds": true,
+    "attacker_upper95_excess_le_1pp": true,
+    "utility_delta_le_0_35": true,
+    "evaluation_ratio_le_3": true,
+    "zero_cloud_non_bypass": true,
+    "bounded_active_delta_0_5": true
+  },
+  "production_blockers": [
+    "cloud surrogate has only five trainable scalar parameters and does not establish production-scale delegated capacity",
+    "arbitrary malicious cloud computation has no independently verifiable integrity",
+    "reported activation-DP epsilon is millions and is not a useful formal privacy guarantee",
+    "evaluation is a 2000-step Qwen3-0.6B diagnostic rather than convergence or task-quality evidence",
+    "full live attacker suite and split-inference path are not yet covered"
+  ]
+}

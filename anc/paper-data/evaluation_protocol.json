@@ -1,0 +1,118 @@
+{
+  "schema": "dtraining.complete_view_evaluation_protocol.v1",
+  "status": "frozen",
+  "scope": "Confirmation protocol for a candidate defense after a complete remote transcript has been captured. Historical artifacts are exploratory and do not satisfy this protocol.",
+  "candidate_frozen": true,
+  "required_arms": {
+    "naked_no_randomization": "D=64 with the randomization layers off and shape-matched inert padding. Isolates the randomization stack.",
+    "naked_full_width": "Full-width D=1024 with the defense disabled. Isolates the bottleneck.",
+    "defended": "Frozen candidate defense under the exact same corpus/task, model, transcript, and attack budget.",
+    "shuffled_label": "Negative control that preserves views and globally permutes only evaluator labels.",
+    "injected_leak": "Exact-codeword leakage injection inside the defended representation, across predeclared dose, token-frequency, frame-length, and training-size sweeps."
+  },
+  "attack_families": [
+    "forward_only",
+    "gradient_only",
+    "joint_forward_gradient",
+    "accumulated_history",
+    "stateful_remote_state",
+    "timing_metadata",
+    "active_perturbation",
+    "membership_property",
+    "response_side"
+  ],
+  "metrics": [
+    "token_top1",
+    "token_cross_entropy",
+    "rare_token_top1",
+    "sequence_exact_match",
+    "semantic_recovery",
+    "membership_auc",
+    "property_auc",
+    "response_side_recovery"
+  ],
+  "statistical_plan": {
+    "inferential_unit": "training run or document/block, never independently sampled token rows",
+    "minimum_independent_training_seeds": 3,
+    "uncertainty": "paired cluster bootstrap or hierarchical model, with effect sizes and confidence intervals",
+    "split": "document-level held-out split",
+    "second_task": "required unless an explicit limitation is recorded"
+  },
+  "freeze_rules": [
+    "Set pass/fail thresholds before running the defended confirmation arm.",
+    "Tune only on development data and keep adaptive red-team implementations separate from defense tuning.",
+    "Do not report MINE or Donsker-Varadhan values as privacy certificates.",
+    "Do not report a complete-cloud claim until every required complete-view arm and control is recorded."
+  ],
+  "required_reporting": [
+    "per-arm matched baselines",
+    "attack implementation and seed",
+    "transcript collection manifest digest",
+    "configuration, tokenizer, corpus split, and code commit",
+    "cluster-aware effect size and interval",
+    "control pass/fail status",
+    "pre-registered or exploratory label"
+  ],
+  "amendments": [
+    {
+      "date": "2026-08-21",
+      "change": "Replaced the single 'representation-matched naked control' with three distinct controls.",
+      "reason": "Identical frame length and zero chaff are mutually exclusive - chaff is what expands a 32-row frame to 80 - so one matched naked control is not constructible. See PLAN.md W2.2.",
+      "authority": "PLAN.md section 5"
+    },
+    {
+      "date": "2026-08-25",
+      "change": "Flipped status from pending_freeze to frozen; candidate_frozen=True. Declared pre-declared thresholds for the four emitting metrics (token_top1, rare_token_top1, token_cross_entropy, membership_auc) from the W2.4 calibration matrix and W2.6 map; declared remaining families unmeasured.",
+      "reason": "W2.3, W2.4, W2.5, W2.6 are complete; the calibration matrix is stable; W8 external audit and prior-art positioning are banked. F.1 gate unblocked.",
+      "authority": "PLAN.md F.1"
+    }
+  ],
+  "open_requirements": [
+    "family_to_metric_applicability_map (PLAN.md W2.6): exact-codeword injection is not a representation-matched positive control for membership AUC, property AUC, semantic recovery, response-side leakage, timing, or active attacks.",
+    "seams S2/S4/S6 from docs/THREAT_MAP.md have no attack family here (PLAN.md W2.6)."
+  ],
+  "metric_emitters": {
+    "token_top1": {
+      "producer": "attacker/attacks/latent_probe.py --dump-eval-predictions \u2192 bin/leakage_metrics.py",
+      "implemented": true
+    },
+    "token_cross_entropy": {
+      "producer": "attacker/attacks/latent_probe.py --dump-eval-probabilities \u2192 bin/leakage_metrics.py",
+      "implemented": true
+    },
+    "rare_token_top1": {
+      "producer": "attacker/attacks/latent_probe.py --dump-eval-predictions \u2192 bin/leakage_metrics.py",
+      "implemented": true
+    },
+    "membership_auc": {
+      "producer": "attacker/attacks/latent_probe.py --dump-eval-probabilities (train-side confidence) \u2192 bin/leakage_metrics.py",
+      "implemented": true
+    },
+    "sequence_exact_match": {
+      "producer": null,
+      "implemented": false,
+      "unavailable_reason": "Released rows carry a fresh token permutation per frame; sequence order is not recoverable from any released artifact. Needs the trusted-side permutation, which is correctly sealed."
+    },
+    "semantic_recovery": {
+      "producer": null,
+      "implemented": false,
+      "unavailable_reason": "No similarity measure has been chosen. PLAN.md W2.6 records this as an open item that must be named before freeze."
+    },
+    "property_auc": {
+      "producer": null,
+      "implemented": false,
+      "unavailable_reason": "Needs per-row property labels, which no capture carries."
+    },
+    "response_side_recovery": {
+      "producer": null,
+      "implemented": false,
+      "unavailable_reason": "Needs response-side capture. The transcript protocol records the forward and backward wire, not the response."
+    }
+  },
+  "freeze_record": {
+    "date": "2026-08-25",
+    "record_document": "paper-data/FREEZE_RECORD_2026-08-25.md",
+    "thresholds_document": "paper-data/family_metric_map.json",
+    "authority": "PLAN.md F.1"
+  }
+}

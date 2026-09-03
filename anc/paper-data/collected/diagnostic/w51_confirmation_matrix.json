@@ -1,0 +1,1239 @@
+{
+  "arms": {
+    "defended": "Frozen candidate defense under the exact same corpus/task, model, transcript, and attack budget.",
+    "injected_leak": "Exact-codeword leakage injection inside the defended representation, across predeclared dose, token-frequency, frame-length, and training-size sweeps.",
+    "naked_full_width": "Full-width D=1024 with the defense disabled. Isolates the bottleneck.",
+    "naked_no_randomization": "D=64 with the randomization layers off and shape-matched inert padding. Isolates the randomization stack.",
+    "shuffled_label": "Negative control that preserves views and globally permutes only evaluator labels."
+  },
+  "cells": [
+    {
+      "arm": "naked_no_randomization",
+      "family": "forward_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "forward_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "forward_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "forward_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "forward_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "forward_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "defended",
+      "family": "forward_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "defended",
+      "family": "forward_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "defended",
+      "family": "forward_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "forward_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "forward_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "forward_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "forward_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "forward_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "forward_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "gradient_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the backward wire",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "gradient_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the backward wire",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "gradient_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the backward wire",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "gradient_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the backward wire",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "gradient_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the backward wire",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "gradient_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the backward wire",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "defended",
+      "family": "gradient_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the backward wire",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "defended",
+      "family": "gradient_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the backward wire",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "defended",
+      "family": "gradient_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the backward wire",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "gradient_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the backward wire",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "gradient_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the backward wire",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "gradient_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the backward wire",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "gradient_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the backward wire",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "gradient_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the backward wire",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "gradient_only",
+      "metrics": [
+        "token_top1",
+        "rare_token_top1",
+        "token_cross_entropy"
+      ],
+      "positive_control": "injected_leak on the backward wire",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "joint_forward_gradient",
+      "metrics": [
+        "token_top1"
+      ],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "joint_forward_gradient",
+      "metrics": [
+        "token_top1"
+      ],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "joint_forward_gradient",
+      "metrics": [
+        "token_top1"
+      ],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "joint_forward_gradient",
+      "metrics": [
+        "token_top1"
+      ],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "joint_forward_gradient",
+      "metrics": [
+        "token_top1"
+      ],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "joint_forward_gradient",
+      "metrics": [
+        "token_top1"
+      ],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "defended",
+      "family": "joint_forward_gradient",
+      "metrics": [
+        "token_top1"
+      ],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "defended",
+      "family": "joint_forward_gradient",
+      "metrics": [
+        "token_top1"
+      ],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "defended",
+      "family": "joint_forward_gradient",
+      "metrics": [
+        "token_top1"
+      ],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "joint_forward_gradient",
+      "metrics": [
+        "token_top1"
+      ],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "joint_forward_gradient",
+      "metrics": [
+        "token_top1"
+      ],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "joint_forward_gradient",
+      "metrics": [
+        "token_top1"
+      ],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "joint_forward_gradient",
+      "metrics": [
+        "token_top1"
+      ],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "joint_forward_gradient",
+      "metrics": [
+        "token_top1"
+      ],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "joint_forward_gradient",
+      "metrics": [
+        "token_top1"
+      ],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "accumulated_history",
+      "reason": "applicable metric but no positive control: no control exists; KV-cache seam (S4) unmeasured",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "accumulated_history",
+      "reason": "applicable metric but no positive control: no control exists; KV-cache seam (S4) unmeasured",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "accumulated_history",
+      "reason": "applicable metric but no positive control: no control exists; KV-cache seam (S4) unmeasured",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "accumulated_history",
+      "reason": "applicable metric but no positive control: no control exists; KV-cache seam (S4) unmeasured",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "accumulated_history",
+      "reason": "applicable metric but no positive control: no control exists; KV-cache seam (S4) unmeasured",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "accumulated_history",
+      "reason": "applicable metric but no positive control: no control exists; KV-cache seam (S4) unmeasured",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "defended",
+      "family": "accumulated_history",
+      "reason": "applicable metric but no positive control: no control exists; KV-cache seam (S4) unmeasured",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "defended",
+      "family": "accumulated_history",
+      "reason": "applicable metric but no positive control: no control exists; KV-cache seam (S4) unmeasured",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "defended",
+      "family": "accumulated_history",
+      "reason": "applicable metric but no positive control: no control exists; KV-cache seam (S4) unmeasured",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "accumulated_history",
+      "reason": "applicable metric but no positive control: no control exists; KV-cache seam (S4) unmeasured",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "accumulated_history",
+      "reason": "applicable metric but no positive control: no control exists; KV-cache seam (S4) unmeasured",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "accumulated_history",
+      "reason": "applicable metric but no positive control: no control exists; KV-cache seam (S4) unmeasured",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "accumulated_history",
+      "reason": "applicable metric but no positive control: no control exists; KV-cache seam (S4) unmeasured",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "accumulated_history",
+      "reason": "applicable metric but no positive control: no control exists; KV-cache seam (S4) unmeasured",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "accumulated_history",
+      "reason": "applicable metric but no positive control: no control exists; KV-cache seam (S4) unmeasured",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "stateful_remote_state",
+      "reason": "applicable metric but no positive control: no control; remote-state seam (S6) unmeasured",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "stateful_remote_state",
+      "reason": "applicable metric but no positive control: no control; remote-state seam (S6) unmeasured",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "stateful_remote_state",
+      "reason": "applicable metric but no positive control: no control; remote-state seam (S6) unmeasured",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "stateful_remote_state",
+      "reason": "applicable metric but no positive control: no control; remote-state seam (S6) unmeasured",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "stateful_remote_state",
+      "reason": "applicable metric but no positive control: no control; remote-state seam (S6) unmeasured",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "stateful_remote_state",
+      "reason": "applicable metric but no positive control: no control; remote-state seam (S6) unmeasured",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "defended",
+      "family": "stateful_remote_state",
+      "reason": "applicable metric but no positive control: no control; remote-state seam (S6) unmeasured",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "defended",
+      "family": "stateful_remote_state",
+      "reason": "applicable metric but no positive control: no control; remote-state seam (S6) unmeasured",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "defended",
+      "family": "stateful_remote_state",
+      "reason": "applicable metric but no positive control: no control; remote-state seam (S6) unmeasured",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "stateful_remote_state",
+      "reason": "applicable metric but no positive control: no control; remote-state seam (S6) unmeasured",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "stateful_remote_state",
+      "reason": "applicable metric but no positive control: no control; remote-state seam (S6) unmeasured",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "stateful_remote_state",
+      "reason": "applicable metric but no positive control: no control; remote-state seam (S6) unmeasured",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "stateful_remote_state",
+      "reason": "applicable metric but no positive control: no control; remote-state seam (S6) unmeasured",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "stateful_remote_state",
+      "reason": "applicable metric but no positive control: no control; remote-state seam (S6) unmeasured",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "stateful_remote_state",
+      "reason": "applicable metric but no positive control: no control; remote-state seam (S6) unmeasured",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "timing_metadata",
+      "reason": "seam S6; no leakage metric applies to control-metadata timing",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "timing_metadata",
+      "reason": "seam S6; no leakage metric applies to control-metadata timing",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "timing_metadata",
+      "reason": "seam S6; no leakage metric applies to control-metadata timing",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "timing_metadata",
+      "reason": "seam S6; no leakage metric applies to control-metadata timing",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "timing_metadata",
+      "reason": "seam S6; no leakage metric applies to control-metadata timing",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "timing_metadata",
+      "reason": "seam S6; no leakage metric applies to control-metadata timing",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "defended",
+      "family": "timing_metadata",
+      "reason": "seam S6; no leakage metric applies to control-metadata timing",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "defended",
+      "family": "timing_metadata",
+      "reason": "seam S6; no leakage metric applies to control-metadata timing",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "defended",
+      "family": "timing_metadata",
+      "reason": "seam S6; no leakage metric applies to control-metadata timing",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "timing_metadata",
+      "reason": "seam S6; no leakage metric applies to control-metadata timing",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "timing_metadata",
+      "reason": "seam S6; no leakage metric applies to control-metadata timing",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "timing_metadata",
+      "reason": "seam S6; no leakage metric applies to control-metadata timing",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "timing_metadata",
+      "reason": "seam S6; no leakage metric applies to control-metadata timing",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "timing_metadata",
+      "reason": "seam S6; no leakage metric applies to control-metadata timing",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "timing_metadata",
+      "reason": "seam S6; no leakage metric applies to control-metadata timing",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "active_perturbation",
+      "metrics": [
+        "token_cross_entropy"
+      ],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "active_perturbation",
+      "metrics": [
+        "token_cross_entropy"
+      ],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "active_perturbation",
+      "metrics": [
+        "token_cross_entropy"
+      ],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "active_perturbation",
+      "metrics": [
+        "token_cross_entropy"
+      ],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "active_perturbation",
+      "metrics": [
+        "token_cross_entropy"
+      ],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "active_perturbation",
+      "metrics": [
+        "token_cross_entropy"
+      ],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "defended",
+      "family": "active_perturbation",
+      "metrics": [
+        "token_cross_entropy"
+      ],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "defended",
+      "family": "active_perturbation",
+      "metrics": [
+        "token_cross_entropy"
+      ],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "defended",
+      "family": "active_perturbation",
+      "metrics": [
+        "token_cross_entropy"
+      ],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "active_perturbation",
+      "metrics": [
+        "token_cross_entropy"
+      ],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "active_perturbation",
+      "metrics": [
+        "token_cross_entropy"
+      ],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "active_perturbation",
+      "metrics": [
+        "token_cross_entropy"
+      ],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "active_perturbation",
+      "metrics": [
+        "token_cross_entropy"
+      ],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "seed": 42,
+      "status": "constructible"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "active_perturbation",
+      "metrics": [
+        "token_cross_entropy"
+      ],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "seed": 43,
+      "status": "constructible"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "active_perturbation",
+      "metrics": [
+        "token_cross_entropy"
+      ],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "seed": 44,
+      "status": "constructible"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "membership_property",
+      "reason": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "membership_property",
+      "reason": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "membership_property",
+      "reason": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "membership_property",
+      "reason": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "membership_property",
+      "reason": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "membership_property",
+      "reason": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "defended",
+      "family": "membership_property",
+      "reason": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "defended",
+      "family": "membership_property",
+      "reason": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "defended",
+      "family": "membership_property",
+      "reason": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "membership_property",
+      "reason": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "membership_property",
+      "reason": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "membership_property",
+      "reason": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "membership_property",
+      "reason": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "membership_property",
+      "reason": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "membership_property",
+      "reason": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "response_side",
+      "reason": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "response_side",
+      "reason": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_no_randomization",
+      "family": "response_side",
+      "reason": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "response_side",
+      "reason": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "response_side",
+      "reason": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "naked_full_width",
+      "family": "response_side",
+      "reason": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "defended",
+      "family": "response_side",
+      "reason": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "defended",
+      "family": "response_side",
+      "reason": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "defended",
+      "family": "response_side",
+      "reason": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "response_side",
+      "reason": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "response_side",
+      "reason": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "shuffled_label",
+      "family": "response_side",
+      "reason": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect",
+      "seed": 44,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "response_side",
+      "reason": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect",
+      "seed": 42,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "response_side",
+      "reason": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect",
+      "seed": 43,
+      "status": "unmeasured"
+    },
+    {
+      "arm": "injected_leak",
+      "family": "response_side",
+      "reason": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect",
+      "seed": 44,
+      "status": "unmeasured"
+    }
+  ],
+  "constructibility_rule": "constructible requires an applicable metric AND a positive control (family_metric_map.json; freeze record: no headline cell without a representation-matched positive control)",
+  "constructible": 60,
+  "families": [
+    "forward_only",
+    "gradient_only",
+    "joint_forward_gradient",
+    "accumulated_history",
+    "stateful_remote_state",
+    "timing_metadata",
+    "active_perturbation",
+    "membership_property",
+    "response_side"
+  ],
+  "frozen_thresholds": {
+    "membership_auc": {
+      "control": "NONE -- the constant control is vacuous (any constant score gives AUC 0.5). Declared unavailable for headline use until a representation-matched control exists",
+      "threshold_basis": "FALSIFIED as a channel 2026-08-24 (the coordinate probe's in-sample memorization, not a wire mark; OPEN_CHANNELS.md CORRECTION). Retained as a probe-generalization diagnostic only. A real membership test (train-vs-eval wire with randomized assignment) is a W2.6 open item -- no positive control exists yet",
+      "threshold_pp": null
+    },
+    "rare_token_top1": {
+      "control": "shuffled_label null; raw_recovery_pct_by_probe accompanies every advantage (the degenerate-control flag)",
+      "threshold_basis": "most sensitive metric (on at coverage 0.04); restricted to tokens below the 50th percentile, where a frequent-token control reads exactly 0 by construction, so raw recovery is reported alongside the advantage",
+      "threshold_pp": 1.0
+    },
+    "token_cross_entropy": {
+      "control": "per-arm matched null (grad_real vs grad_real_shuffled); the constant control is inadmissible here",
+      "threshold_basis": "proper scoring rule -- a confidently-wrong null inverts it (W2.3 s45 +21.1); read as arm minus the arm's matched null, not against the constant control",
+      "threshold_pp": "arm minus matched-null, NEVER raw"
+    },
+    "token_top1": {
+      "control": "shuffled_label null (label-permuted features); per-arm baseline_for",
+      "threshold_basis": "W2.4 dose-response: sharp injection onset at coverage ~0.06-0.10 across training size and frame length; +1.0 pp is the pre-declared horizontal gate line",
+      "threshold_pp": 1.0
+    }
+  },
+  "index_source": "paper-data/collected/diagnostic/w34_complete/w34_index.json",
+  "schema": "dtraining.w51_confirmation_matrix.v2",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "unmeasured": 75
+}

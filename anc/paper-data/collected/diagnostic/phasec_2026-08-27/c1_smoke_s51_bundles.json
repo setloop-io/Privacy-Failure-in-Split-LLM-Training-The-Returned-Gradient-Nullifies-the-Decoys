@@ -1,0 +1,160 @@
+{
+  "bundles": {
+    "grad_all": {
+      "eval_blocks": [
+        24,
+        80,
+        64
+      ],
+      "eval_rows": 1920,
+      "path": "/workspace/experiments/results/training/phasec/bundles/c1_smoke_s51/grad_all.pt",
+      "train_blocks": [
+        16,
+        80,
+        64
+      ]
+    },
+    "grad_real": {
+      "eval_blocks": [
+        24,
+        32,
+        64
+      ],
+      "eval_rows": 768,
+      "path": "/workspace/experiments/results/training/phasec/bundles/c1_smoke_s51/grad_real.pt",
+      "train_blocks": [
+        16,
+        32,
+        64
+      ]
+    },
+    "grad_real_shuffled": {
+      "eval_blocks": [
+        24,
+        32,
+        64
+      ],
+      "eval_rows": 768,
+      "path": "/workspace/experiments/results/training/phasec/bundles/c1_smoke_s51/grad_real_shuffled.pt",
+      "train_blocks": [
+        16,
+        32,
+        64
+      ]
+    },
+    "grad_shuffled": {
+      "eval_blocks": [
+        24,
+        80,
+        64
+      ],
+      "eval_rows": 1920,
+      "path": "/workspace/experiments/results/training/phasec/bundles/c1_smoke_s51/grad_shuffled.pt",
+      "train_blocks": [
+        16,
+        80,
+        64
+      ]
+    },
+    "joint_real": {
+      "eval_blocks": [
+        24,
+        32,
+        128
+      ],
+      "eval_rows": 768,
+      "path": "/workspace/experiments/results/training/phasec/bundles/c1_smoke_s51/joint_real.pt",
+      "train_blocks": [
+        16,
+        32,
+        128
+      ]
+    },
+    "joint_real_scaled": {
+      "eval_blocks": [
+        24,
+        32,
+        128
+      ],
+      "eval_rows": 768,
+      "path": "/workspace/experiments/results/training/phasec/bundles/c1_smoke_s51/joint_real_scaled.pt",
+      "train_blocks": [
+        16,
+        32,
+        128
+      ]
+    },
+    "wire_all": {
+      "eval_blocks": [
+        24,
+        80,
+        64
+      ],
+      "eval_rows": 1920,
+      "path": "/workspace/experiments/results/training/phasec/bundles/c1_smoke_s51/wire_all.pt",
+      "train_blocks": [
+        16,
+        80,
+        64
+      ]
+    },
+    "wire_real": {
+      "eval_blocks": [
+        24,
+        32,
+        64
+      ],
+      "eval_rows": 768,
+      "path": "/workspace/experiments/results/training/phasec/bundles/c1_smoke_s51/wire_real.pt",
+      "train_blocks": [
+        16,
+        32,
+        64
+      ]
+    }
+  },
+  "capture": "/workspace/experiments/results/training/phasec/bundles/c1_smoke_s51_gradchannel.pt",
+  "config": {
+    "chaff_tokens": 48,
+    "grad_clip_norm": null,
+    "grad_noise_multiplier": null,
+    "noise_multiplier": 0.35,
+    "outbound_grad_dp": "off",
+    "remote_grad_clip": 1.0,
+    "seq_len": 32,
+    "split_after": 21,
+    "steps": 60,
+    "train_blocks": 32,
+    "wire_quant": "none"
+  },
+  "magnitudes": {
+    "outbound_forward_frame_rows": {
+      "max": 3.8466169834136963,
+      "mean": 2.9715704917907715,
+      "median": 2.961698055267334,
+      "min": 2.0848937034606934,
+      "p95": 3.4268698692321777,
+      "rows": 3200
+    },
+    "outbound_output_gradient_rows": {
+      "max": 0.026889149099588394,
+      "mean": 0.0021940874867141247,
+      "median": 0.0017464837292209268,
+      "min": 2.5824389012996107e-05,
+      "p95": 0.004684779327362776,
+      "rows": 1280
+    }
+  },
+  "schema": "dtraining.grad_channel_bundles.v1",
+  "support_leak": {
+    "frames": 40,
+    "frames_with_exact_agreement": 40,
+    "frames_with_exact_agreement_pct": 100.0,
+    "nonzero_rows_per_frame_max": 32,
+    "nonzero_rows_per_frame_min": 32,
+    "real_rows_per_frame": 32,
+    "row_agreement_zero_support_vs_real": 1.0,
+    "rows_per_frame": 80
+  },
+  "unique_blocks": false
+}

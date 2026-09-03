@@ -1,0 +1,18 @@
+{
+  "version": "latent-native-v5",
+  "launchable": false,
+  "threat_model": {"tln": "trusted", "ucn": "compromised", "cryptographic_confidentiality": false},
+  "topology": {"hidden_width": 1024, "wire_width": 128, "tln_owns": ["private_layers", "encoder", "decoder", "secrets"], "ucn_owns": ["latent_native_middle_only"]},
+  "mechanisms": {
+    "1_latent_native_cloud": true,
+    "2_adaptive_attacker_in_loop": ["token", "property", "hidden_reconstruction"],
+    "3_width_reduction": "1024_to_128",
+    "4_post_compression_token_dp": {"clip": 1.0, "noise_multiplier": 8.0, "delta": 1e-6, "directions": ["forward", "return"]},
+    "5_tln_private_boundary": {"enabled": true, "trusted_residual_correction": true},
+    "6_request_stochasticity": "CSPRNG fresh nonce and noise",
+    "7_prompt_randomization": "slot permutation and dummy padding",
+    "8_dense_latent_ratchet": "request scoped D-by-D orthogonal"
+  },
+  "required_gates": ["mechanism_unit_gate", "adaptive_attack_saturation", "utility", "runtime", "remote_ucn_artifact_audit"],
+  "warning": "Empirical privacy only. A compromised UCN observes released latents; no encryption or TEE claim."
+}

@@ -1,0 +1,90 @@
+{
+  "schema": "distributed-privacy.production-profile.v3",
+  "mode": "training",
+  "launchable": false,
+  "reason": "Mechanisms are implemented and locally tested, but nonlinear two-server MPC and real multi-node validation remain mandatory launch gates.",
+  "topology": {
+    "trusted_node": "tln",
+    "untrusted_nodes": ["ucn", "second_non_colluding_peer_required"],
+    "minimum_local_layers": 16,
+    "split_after_depth": 16,
+    "non_collusion_assumption": true
+  },
+  "privacy_boundary": {
+    "bottleneck": {
+      "kind": "learned_nonlinear_dimensional_reduction",
+      "dimension_ratio_max": 0.125,
+      "trusted_encoder_private": true,
+      "cloud_adapter_public": true,
+      "adversarial_token_head": true
+    },
+    "activation_dp": {
+      "adjacency": "replace_one",
+      "forward": {"clip_norm": 1.0, "noise_multiplier": "calibrate"},
+      "return": {"clip_norm": 1.0, "noise_multiplier": "calibrate"},
+      "delta": 1e-6,
+      "composed_epsilon_target_max": 3.0,
+      "accountant": "zcdp_gaussian_replace_one"
+    }
+  },
+  "traffic_accounting": {
+    "reserve_before_send": true,
+    "directions": [
+      "activation_request",
+      "activation_response",
+      "gradient_request",
+      "gradient_response"
+    ],
+    "count_retries": true,
+    "count_evaluation": true,
+    "duplicate_exchange": "fail"
+  },
+  "replay_resistance": {
+    "csprng_data_order": true,
+    "private_minibatch_manifest": true,
+    "request_nonce": true,
+    "slot_permutation": true,
+    "variable_padding": true,
+    "dummy_sequences": true,
+    "template_family_randomization": true,
+    "optimizer_state_private": true,
+    "labels_and_loss_private": true
+  },
+  "two_server_sharing": {
+    "field": "2^61-1",
+    "fixed_point": true,
+    "linear_operations": "implemented",
+    "nonlinear_operations": "blocked_until_audited_mpc",
+    "reconstruction_on_untrusted_node": "forbidden"
+  },
+  "evaluation": {
+    "fixed_K3_512": "removed",
+    "known_plaintext": "adaptive_until_saturation",
+    "required_attacks": [
+      "wire-eval",
+      "accumulation",
+      "known-prefix",
+      "stale-key",
+      "sharded",
+      "gradient-inversion",
+      "membership",
+      "alignment-search",
+      "active-cloud",
+      "subspace-joint",
+      "ica-bss",
+      "leak-accumulation",
+      "max-effort"
+    ],
+    "all_attacks_must_complete": true,
+    "multiple_victims_seeds_and_sessions": true,
+    "per_attack_confidence_level": 0.95
+  },
+  "required_before_launch": [
+    "audited_nonlinear_two_server_mpc",
+    "second_independently_administered_untrusted_peer",
+    "end_to_end_bottleneck_pretraining",
+    "calibrated_epsilon_at_declared_workload",
+    "real_tln_ucn_peer_runtime_validation",
+    "all_attacker_gates_pass"
+  ]
+}

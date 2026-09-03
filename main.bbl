@@ -1,0 +1,242 @@
+\begin{thebibliography}{10}
+
+\bibitem{balunovic2022lamp}
+Mislav Balunovi{\'c}, Dimitar~I. Dimitrov, Nikola Jovanovi{\'c}, and Martin
+  Vechev.
+\newblock {LAMP}: Extracting text from gradients with language model priors.
+\newblock In {\em Advances in Neural Information Processing Systems
+  ({NeurIPS})}, volume~35, 2022.
+
+\bibitem{gelo}
+Anatoly Belikov and Ilya Fedotov.
+\newblock Good-enough {LLM} obfuscation, 2026.
+
+\bibitem{carlini2022lira}
+Nicholas Carlini, Steve Chien, Milad Nasr, Shuang Song, Andreas Terzis, and
+  Florian Tram{\`e}r.
+\newblock Membership inference attacks from first principles.
+\newblock In {\em 2022 {IEEE} Symposium on Security and Privacy}, pages
+  1897--1914, 2022.
+
+\bibitem{carlini2019secret}
+Nicholas Carlini, Chang Liu, {\'U}lfar Erlingsson, Jernej Kos, and Dawn Song.
+\newblock The secret sharer: Evaluating and testing unintended memorization in
+  neural networks.
+\newblock In {\em 28th {USENIX} Security Symposium ({USENIX} Security 19)},
+  pages 267--284. {USENIX} Association, August 2019.
+
+\bibitem{mixguard}
+Chen Chen, Xiang Gao, Xianshun Wang, Chengran Li, Shengyu Xia, Xueluan Gong,
+  Linru Zhang, Qian Wang, and Kwok-Yan Lam.
+\newblock The art of mixology: Mixup-based obfuscation for privacy-preserving
+  split learning in large language models, 2026.
+
+\bibitem{bisr}
+Guanzhong Chen, Zhenghan Qin, Mingxin Yang, Yajie Zhou, Tao Fan, Tianyu Du, and
+  Zenglin Xu.
+\newblock Unveiling the vulnerability of private fine-tuning in split-based
+  frameworks for large language models: A bidirectionally enhanced attack.
+\newblock In {\em Proceedings of the 2024 {ACM} {SIGSAC} Conference on Computer
+  and Communications Security}, pages 2904--2918. Association for Computing
+  Machinery, 2024.
+\newblock arXiv:2409.00960.
+
+\bibitem{deng2021tag}
+Jieren Deng, Yijue Wang, Ji~Li, Chenghong Wang, Chao Shang, Hang Liu,
+  Sanguthevar Rajasekaran, and Caiwen Ding.
+\newblock {TAG}: Gradient attack on transformer-based language models.
+\newblock In {\em Findings of the Association for Computational Linguistics:
+  {EMNLP} 2021}, pages 3600--3610. Association for Computational Linguistics,
+  November 2021.
+
+\bibitem{dong2025depth}
+Tian Dong, Yan Meng, Shaofeng Li, Guoxing Chen, Zhen Liu, and Haojin Zhu.
+\newblock Depth gives a false sense of privacy: {LLM} internal states
+  inversion.
+\newblock In {\em 34th {USENIX} Security Symposium ({USENIX} Security 25)},
+  pages 1629--1648. {USENIX} Association, August 2025.
+
+\bibitem{erdogan2022unsplit}
+Ege Erdogan, Alptekin K{\"u}p{\c{c}}{\"u}, and A.~Erc{\"u}ment
+  {\c{C}}i{\c{c}}ek.
+\newblock {UnSplit}: Data-oblivious model inversion, model stealing, and label
+  inference attacks against split learning.
+\newblock In {\em Proceedings of the 2022 Workshop on Privacy in the Electronic
+  Society ({WPES})}, pages 115--124, 2022.
+
+\bibitem{gao2023pcat}
+Xinben Gao and Lan Zhang.
+\newblock {PCAT}: Functionality and data stealing from split learning by
+  pseudo-client attack.
+\newblock In {\em 32nd {USENIX} Security Symposium ({USENIX} Security 23)},
+  pages 5271--5288. {USENIX} Association, August 2023.
+
+\bibitem{vflairllm}
+Zixuan Gu, Qiufeng Fan, Long Sun, Yang Liu, and Xiaojun Ye.
+\newblock {VFLAIR-LLM}: A comprehensive framework and benchmark for split
+  learning of {LLMs}.
+\newblock In {\em Proceedings of the 31st {ACM} {SIGKDD} Conference on
+  Knowledge Discovery and Data Mining V.2}, pages 5470--5481. Association for
+  Computing Machinery, 2025.
+\newblock arXiv:2508.03097.
+
+\bibitem{promptstoresponses}
+Zixuan Gu, Xiaojun Ye, and Yang Liu.
+\newblock From prompts to responses: Dual-sided data leakage and defense in
+  split large language models, 2026.
+
+\bibitem{sigma}
+Kanav Gupta, Neha Jawalkar, Ananta Mukherjee, Nishanth Chandran, Divya Gupta,
+  Ashish Panwar, and Rahul Sharma.
+\newblock {SIGMA}: Secure {GPT} inference with function secret sharing.
+\newblock {\em PoPETs}, 2024(4), 2024.
+
+\bibitem{gupta2022film}
+Samyak Gupta, Yangsibo Huang, Zexuan Zhong, Tianyu Gao, Kai Li, and Danqi Chen.
+\newblock Recovering private text in federated learning of language models.
+\newblock In {\em Advances in Neural Information Processing Systems
+  ({NeurIPS})}, volume~35, 2022.
+
+\bibitem{jagielski2020auditing}
+Matthew Jagielski, Jonathan Ullman, and Alina Oprea.
+\newblock Auditing differentially private machine learning: How private is
+  private {SGD}?
+\newblock In {\em Advances in Neural Information Processing Systems
+  ({NeurIPS})}, volume~33, 2020.
+
+\bibitem{puma}
+Wen jie Lu et~al.
+\newblock {PUMA}: Secure inference of {LLaMA}-7{B} in five minutes, 2023.
+
+\bibitem{bumblebee}
+Wen jie Lu et~al.
+\newblock {BumbleBee}: Secure two-party inference framework for large
+  transformers.
+\newblock In {\em NDSS}, 2025.
+
+\bibitem{li2022labelleakage}
+Oscar Li, Jiankai Sun, Xin Yang, Weihao Gao, Hongyi Zhang, Junyuan Xie,
+  Virginia Smith, and Chong Wang.
+\newblock Label leakage and protection in two-party split learning.
+\newblock In {\em International Conference on Learning Representations
+  ({ICLR})}, 2022.
+
+\bibitem{aloepri}
+Yu~Lin, Qizhi Zhang, Wenqiang Ruan, Daode Zhang, Jue Hong, Ye~Wu, Hanning Xia,
+  Yunlong Mao, and Sheng Zhong.
+\newblock Towards privacy-preserving {LLM} inference via covariant obfuscation,
+  2026.
+\newblock v2; v1 title used ``Collaborative''.
+
+\bibitem{dualguard}
+Zihan Liu, Yizhen Wang, Rui Wang, and Sai Wu.
+\newblock {DualGuard}: A parameter space transformation approach for
+  bidirectional defense in split-based {LLM} fine-tuning.
+\newblock In {\em Proceedings of the 63rd Annual Meeting of the Association for
+  Computational Linguistics (Volume 1: Long Papers)}, pages 17065--17080,
+  Vienna, Austria, July 2025. Association for Computational Linguistics.
+
+\bibitem{luoprompt}
+Xinjian Luo, Ting Yu, and Xiaokui Xiao.
+\newblock Prompt inference attack on distributed large language model inference
+  frameworks.
+\newblock In {\em Proceedings of the 2025 {ACM} {SIGSAC} Conference on Computer
+  and Communications Security}, pages 1739--1753, 2025.
+\newblock arXiv:2503.09291.
+
+\bibitem{nasr2023tight}
+Milad Nasr, Jamie Hayes, Thomas Steinke, Borja Balle, Florian Tram{\`e}r,
+  Matthew Jagielski, Nicholas Carlini, and Andreas Terzis.
+\newblock Tight auditing of differentially private machine learning.
+\newblock In {\em 32nd {USENIX} Security Symposium ({USENIX} Security 23)},
+  pages 1631--1648, Anaheim, CA, August 2023. {USENIX} Association.
+
+\bibitem{toploc}
+Jack~Min Ong, Matthew~Di Ferrante, Aaron Pazdera, Ryan Garner, Sami Jaghouar,
+  Manveer Basra, Max Ryabinin, and Johannes Hagemann.
+\newblock {TOPLOC}: A locality sensitive hashing scheme for trustless
+  verifiable inference, 2025.
+
+\bibitem{pasquini2021tiger}
+Dario Pasquini, Giuseppe Ateniese, and Massimo Bernaschi.
+\newblock Unleashing the tiger: Inference attacks on split learning.
+\newblock In {\em Proceedings of the 2021 {ACM} {SIGSAC} Conference on Computer
+  and Communications Security}, pages 2113--2129, 2021.
+
+\bibitem{petrov2024dager}
+Ivo Petrov, Dimitar~I. Dimitrov, Maximilian Baader, Mark~Niklas M{\"u}ller, and
+  Martin Vechev.
+\newblock {DAGER}: Exact gradient inversion for large language models.
+\newblock In {\em Advances in Neural Information Processing Systems
+  ({NeurIPS})}, volume~37, 2024.
+
+\bibitem{pillutla2023randomization}
+Krishna Pillutla, Galen Andrew, Peter Kairouz, H.~Brendan McMahan, Alina Oprea,
+  and Sewoong Oh.
+\newblock Unleashing the power of randomization in auditing differentially
+  private {ML}.
+\newblock In {\em Federated Learning and Analytics in Practice Workshop at
+  {ICML}}, 2023.
+
+\bibitem{singh2024simba}
+Abhishek Singh, Vivek Sharma, Rohan Sukumaran, John Mose, Jeffrey Chiu, Justin
+  Yu, and Ramesh Raskar.
+\newblock {SIMBA}: Split inference---mechanisms, benchmarks and attacks.
+\newblock In {\em Computer Vision -- {ECCV} 2024}, volume 15134 of {\em Lecture
+  Notes in Computer Science}, pages 214--232. Springer Nature Switzerland,
+  2024.
+
+\bibitem{song2021systematic}
+Liwei Song and Prateek Mittal.
+\newblock Systematic evaluation of privacy risks of machine learning models.
+\newblock In {\em 30th {USENIX} Security Symposium ({USENIX} Security 21)},
+  pages 2615--2632. {USENIX} Association, August 2021.
+
+\bibitem{steinke2023onerun}
+Thomas Steinke, Milad Nasr, and Matthew Jagielski.
+\newblock Privacy auditing with one (1) training run.
+\newblock In {\em Advances in Neural Information Processing Systems
+  ({NeurIPS})}, volume~36, 2023.
+\newblock Full version: arXiv:2305.08846.
+
+\bibitem{sun2023metrics}
+Xiaoxiao Sun, Nidham Gazagnadou, Vivek Sharma, Lingjuan Lyu, Hongdong Li, and
+  Liang Zheng.
+\newblock Privacy assessment on reconstructed images: Are existing evaluation
+  metrics faithful to human perception?
+\newblock In {\em Advances in Neural Information Processing Systems
+  ({NeurIPS})}, volume~36, 2023.
+
+\bibitem{vepakomma2018split}
+Praneeth Vepakomma, Otkrist Gupta, Tristan Swedish, and Ramesh Raskar.
+\newblock Split learning for health: Distributed deep learning without sharing
+  raw patient data, 2018.
+
+\bibitem{obfnet}
+Rui Xu et~al.
+\newblock Lightweight and unobtrusive data obfuscation at {IoT} edge for remote
+  inference, 2019.
+
+\bibitem{nexus}
+Jiawen Zhang et~al.
+\newblock {NEXUS}: Secure transformer inference made non-interactive.
+\newblock In {\em NDSS}, 2025.
+\newblock IACR ePrint 2024/136.
+
+\bibitem{permllm}
+Fei Zheng, Chaochao Chen, Zhongxuan Han, and Xiaolin Zheng.
+\newblock {PermLLM}: Private inference of large language models within 3
+  seconds under {WAN}, 2024.
+
+\bibitem{phalatee}
+Jianwei Zhu, Hang Yin, Peng Deng, Aline Almeida, and Shunfan Zhou.
+\newblock Confidential computing on {NVIDIA} hopper {GPUs}: A performance
+  benchmark study, 2024.
+
+\bibitem{zhu2019deep}
+Ligeng Zhu, Zhijian Liu, and Song Han.
+\newblock Deep leakage from gradients.
+\newblock In {\em Advances in Neural Information Processing Systems
+  ({NeurIPS})}, volume~32, 2019.
+
+\end{thebibliography}

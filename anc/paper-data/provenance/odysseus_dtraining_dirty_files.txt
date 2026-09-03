@@ -1,0 +1,27 @@
+ M attacker/attacks/latent_probe.py
+ M bin/run_latent_native_v5_06b.py
+ M privacy_runtime/activation_dp.py
+ M privacy_runtime/latent_native.py
+ M split-training/split_trainer.py
+?? bin/deleg6040_arm_nulls.py
+?? bin/deleg6040_cell.sh
+?? bin/deleg6040_cell_step3.sh
+?? bin/deleg6040_cell_t3.sh
+?? bin/deleg6040_gate_recalibrate.py
+?? bin/deleg6040_gate_statistic.py
+?? bin/deleg6040_grad_bundle.py
+?? bin/deleg6040_grad_cell_t2b.sh
+?? bin/deleg6040_handshake_probe.py
+?? bin/deleg6040_ladder.sh
+?? bin/deleg6040_precheck.sh
+?? bin/deleg6040_variance_run.sh
+?? bin/deleg6040_verify_stats.py
+?? bin/e1_unprotected_cell.sh
+?? bin/leakage_metrics.py
+?? bin/paired_advantage.py
+?? bin/repro_cloud_server.sh
+?? bin/repro_make_corpus.py
+?? bin/repro_make_corpus_original.py
+?? bin/repro_tls_setup.sh
+?? bin/repro_v9_cell.sh
+?? docker/Dockerfile.repro

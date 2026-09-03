@@ -1,0 +1,78 @@
+{
+  "schema": "dtraining.family_metric_map.v1",
+  "note": "PLAN.md W2.6: for each attack family, which emitting metric has a positive control and a matched null, and the pre-declared metric-specific threshold. A family/metric pair without a control may not appear in a headline claim (W2.4). Built 2026-08-25 from the W2.3 emitters, the W2.4 dose-response curves, and the forward-membership falsification.",
+  "metrics": {
+    "token_top1": {
+      "threshold_pp": 1.0,
+      "threshold_basis": "W2.4 dose-response: sharp injection onset at coverage ~0.06-0.10 across training size and frame length; +1.0 pp is the pre-declared horizontal gate line",
+      "control": "shuffled_label null (label-permuted features); per-arm baseline_for"
+    },
+    "rare_token_top1": {
+      "threshold_pp": 1.0,
+      "threshold_basis": "most sensitive metric (on at coverage 0.04); restricted to tokens below the 50th percentile, where a frequent-token control reads exactly 0 by construction, so raw recovery is reported alongside the advantage",
+      "control": "shuffled_label null; raw_recovery_pct_by_probe accompanies every advantage (the degenerate-control flag)"
+    },
+    "token_cross_entropy": {
+      "threshold_pp": "arm minus matched-null, NEVER raw",
+      "threshold_basis": "proper scoring rule -- a confidently-wrong null inverts it (W2.3 s45 +21.1); read as arm minus the arm's matched null, not against the constant control",
+      "control": "per-arm matched null (grad_real vs grad_real_shuffled); the constant control is inadmissible here"
+    },
+    "membership_auc": {
+      "threshold_pp": null,
+      "threshold_basis": "FALSIFIED as a channel 2026-08-24 (the coordinate probe's in-sample memorization, not a wire mark; OPEN_CHANNELS.md CORRECTION). Retained as a probe-generalization diagnostic only. A real membership test (train-vs-eval wire with randomized assignment) is a W2.6 open item -- no positive control exists yet",
+      "control": "NONE -- the constant control is vacuous (any constant score gives AUC 0.5). Declared unavailable for headline use until a representation-matched control exists"
+    }
+  },
+  "families": {
+    "forward_only": {
+      "applicable_metrics": ["token_top1", "rare_token_top1", "token_cross_entropy"],
+      "positive_control": "injected_leak on the forward wire, codeword injection (W2.4)",
+      "note": "the original gate's channel; resolves at >= ~12 delegated layers"
+    },
+    "gradient_only": {
+      "applicable_metrics": ["token_top1", "rare_token_top1", "token_cross_entropy"],
+      "positive_control": "injected_leak on the backward wire",
+      "note": "the E1 channel; structural chaff-partition leak"
+    },
+    "joint_forward_gradient": {
+      "applicable_metrics": ["token_top1"],
+      "positive_control": "scaled joint concatenation (joint_real_scaled, E1)",
+      "note": "the family that first broke the pre-declared gate"
+    },
+    "accumulated_history": {
+      "applicable_metrics": ["token_top1"],
+      "positive_control": null,
+      "note": "no control exists; KV-cache seam (S4) unmeasured"
+    },
+    "stateful_remote_state": {
+      "applicable_metrics": ["token_top1"],
+      "positive_control": null,
+      "note": "no control; remote-state seam (S6) unmeasured"
+    },
+    "timing_metadata": {
+      "applicable_metrics": [],
+      "positive_control": null,
+      "note": "seam S6; no leakage metric applies to control-metadata timing"
+    },
+    "active_perturbation": {
+      "applicable_metrics": ["token_cross_entropy"],
+      "positive_control": "amplitude sweep (W2.4) -- CE is dose-insensitive until the perturbation dominates, which is the right control for an active family",
+      "note": "byzantine/perturbation families"
+    },
+    "membership_property": {
+      "applicable_metrics": [],
+      "positive_control": null,
+      "note": "no positive control. W2.6 open item: the falsified membership_auc plus property_auc (no property labels in any capture). A proper test needs randomized train/eval membership assignment"
+    },
+    "response_side": {
+      "applicable_metrics": [],
+      "positive_control": null,
+      "note": "no response-side capture exists in the transcript protocol; unmeasured by design, not by neglect"
+    }
+  },
+  "open_items": [
+    "semantic_recovery: no similarity measure chosen; must be named before freeze, and it is not constructible from the current captures",
+    "membership_property: needs randomized train/eval assignment run to disentangle membership from corpus position",
+    "accumulated_history (S4), stateful_remote_state (S6), timing_metadata (S6): no attack family or metric; recorded as unmeasured seams, not silently dropped"
+  ]
+}

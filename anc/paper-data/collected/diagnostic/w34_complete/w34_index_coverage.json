@@ -1,0 +1,45 @@
+{
+  "schema": "dtraining.full_view_coverage.v1",
+  "sessions": [
+    {
+      "control_events": 20003,
+      "distinct_steps": 10000,
+      "four_payload_frames": 10000,
+      "session_id": "69b21249-4428-4e97-943a-6fe3f95411f4",
+      "state_interval_max": 50,
+      "state_snapshots": 201,
+      "step_range": [
+        0,
+        9999
+      ],
+      "training_frames": 10000
+    },
+    {
+      "control_events": 20003,
+      "distinct_steps": 10000,
+      "four_payload_frames": 10000,
+      "session_id": "c7abd87e-cfd5-4247-abb9-45e2a37b80b6",
+      "state_interval_max": 50,
+      "state_snapshots": 201,
+      "step_range": [
+        0,
+        9999
+      ],
+      "training_frames": 10000
+    },
+    {
+      "control_events": 20003,
+      "distinct_steps": 10000,
+      "four_payload_frames": 10000,
+      "session_id": "d3e09274-baac-4f08-a12a-020ca37c8047",
+      "state_interval_max": 50,
+      "state_snapshots": 201,
+      "step_range": [
+        0,
+        9999
+      ],
+      "training_frames": 10000
+    }
+  ],
+  "total_training_frames": 30000
+}

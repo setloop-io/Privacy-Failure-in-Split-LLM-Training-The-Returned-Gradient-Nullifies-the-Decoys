@@ -1,0 +1,2872 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Georgios Politis geo.politis@gmail.com" />
+  <meta name="author" content="Setloop.io" />
+  <meta name="author" content="Evangelos Pappas evanz.pappas@gmail.com" />
+  <title>Privacy Failure in Split-LLM Training, The Returned Gradient Nullifies the Decoys</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    div.abstract {
+      margin: 2em 2em 2em 2em;
+      text-align: left;
+      font-size: 85%;
+    }
+    div.abstract-title {
+      font-weight: bold;
+      text-align: center;
+      padding: 0;
+      margin-bottom: 0.5em;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title"><strong>Privacy Failure in Split-LLM Training, The
+Returned Gradient Nullifies the Decoys</strong></h1>
+<p class="author">Georgios Politis<br />
+<span><code>geo.politis@gmail.com</code></span></p>
+<p class="author">Setloop.io</p>
+<p class="author">Evangelos Pappas<br />
+<span><code>evanz.pappas@gmail.com</code></span></p>
+<div class="abstract">
+<div class="abstract-title">Abstract</div>
+<p>We present a systems-security case study of a two-node split-LLM
+training system whose privacy evaluation passed while leaving an
+observable channel untested. The Trusted Local Node (<span
+class="smallcaps">tln</span>) sends protected activations to the
+Untrusted Cloud Node (<span class="smallcaps">ucn</span>), the <span
+class="smallcaps">ucn</span> returns its output, and <span
+class="smallcaps">tln</span>, holding the private loss, returns the
+output gradient. The frame the <span class="smallcaps">ucn</span>
+receives mixes real rows with decoys, and the loss ignores the decoys.
+Their gradients are exactly zero, so the pattern of zeros reveals which
+rows were real.</p>
+<p>We measure it with a protocol fixed in advance: a leak injected at
+known strength to prove the instrument can see one, a shuffled-label
+control to prove it does not report absent leaks, and a threshold set
+before the runs. Across nine seeds, the zeros identified the real rows
+on every frame, 4,096 of 4,096 per run. An attack on the frame contents
+recovered about one extra token per hundred over a constant-guess
+baseline
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.65</mn></mrow><annotation encoding="application/x-tex">+0.65</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.50</mn></mrow><annotation encoding="application/x-tex">+1.50</annotation></semantics></math>
+percentage points); the shuffled controls recovered nothing.</p>
+<p>A second set of runs repeated this on a configuration that keeps
+model quality within budget, so the finding is not confined to a setting
+nobody would deploy. On both datasets, every such run passed the
+forward-channel privacy check and the quality check, yet failed that
+same check once the returned gradient was included. Clipping and noising
+each row of the gradient closed the leak for about
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.01</mn><annotation encoding="application/x-tex">0.01</annotation></semantics></math>
+nats of held-out cross-entropy. The system is not thereby safe: five
+classes of attack, including those accumulating observations across
+training steps, were never measured.</p>
+</div>
+</header>
+<h1 id="introduction">Introduction</h1>
+<p>Split learning <span class="citation"
+data-cites="vepakomma2018split"></span> lets a data owner rent cloud
+compute for training without sending raw examples: the trusted side
+sends activations and, because it alone holds the private loss, returns
+the output gradients the untrusted side needs to train. The privacy
+claim of such a system is that the cloud cannot read the training data.
+The claim rests on an evaluation, and the evaluation rests on an
+instrument.</p>
+<p>The instrument examined here failed silently. The original evaluation
+of this two-node split-LLM system instrumented the forward wire, the
+activations sent to the cloud, and passed its privacy gate. The backward
+wire, which carries the output gradient the trusted side returns to the
+cloud, was never declared a privacy surface. In this implementation,
+excluding the decoy rows from the private loss makes their returned
+gradients identically zero; that zero-support construction is an
+implementation and system-design defect. The false assurance has a
+distinct, more general evaluation cause: the observable gradient channel
+was outside the declared adversary view, so the gate never tested it.
+This paper is therefore a systems-security case study with a calibrated
+protocol applied to one system, not a general methodology paper. Its
+contribution is a verified diagnosis of that case and a channel-explicit
+evaluation, positioned against three recent split-LLM evaluations,
+attack and defence alike (Section <a href="#sec:related"
+data-reference-type="ref" data-reference="sec:related">7</a>).</p>
+<p>Separating the real rows from the decoys matters because the decoys
+exist precisely to hide which rows carry the private loss. Exact
+gradient support lets the cloud discard all 48 decoys and isolate the 32
+loss-bearing rows before any content attack, collapsing the anonymity
+set that padding was meant to create. This is a structural metadata
+disclosure, not text reconstruction; the content evidence is separately
+bounded to the implemented frequent-token probe.</p>
+<p>Section <a href="#sec:system" data-reference-type="ref"
+data-reference="sec:system">2</a> defines the system and its declared
+threat surface. Section <a href="#sec:protocol"
+data-reference-type="ref" data-reference="sec:protocol">3</a> lays out
+the evaluation protocol, and Section <a href="#sec:calibration"
+data-reference-type="ref" data-reference="sec:calibration">4</a>
+calibrates the instrument against injected leaks. Section <a
+href="#sec:results" data-reference-type="ref"
+data-reference="sec:results">5</a> reports the structural disclosure,
+its replication, and the mitigation runs; Section <a href="#sec:shape"
+data-reference-type="ref" data-reference="sec:shape">6</a> reports how
+the signal converts to a token advantage with depth, width, and budget.
+Section <a href="#sec:related" data-reference-type="ref"
+data-reference="sec:related">7</a> audits three external evaluations and
+places the work against the DP-auditing and split-LLM literature.
+Section <a href="#sec:scope" data-reference-type="ref"
+data-reference="sec:scope">8</a> records scope, limitations, and the
+verification trail.</p>
+<h1 id="sec:system">The system and the threat model</h1>
+<p>Two cooperating nodes train one LLM. We refer to them throughout by
+their roles: the Trusted Local Node (<span class="smallcaps">tln</span>)
+holds the data and the embedding head, and the Untrusted Cloud Node
+(<span class="smallcaps">ucn</span>) holds a middle stack of transformer
+layers. For each training frame, <span class="smallcaps">tln</span>
+sends a protected latent (the <em>forward wire</em>); <span
+class="smallcaps">ucn</span> trains its stack and returns its output;
+<span class="smallcaps">tln</span>, which alone holds the private loss,
+scores that loss and sends the output gradient <em>back</em> to <span
+class="smallcaps">ucn</span> (the <em>backward wire</em>). Both tensors
+are held by the untrusted node in the clear.</p>
+<p>The defence on the wire is a latent-space bottleneck at width
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>64</mn></mrow><annotation encoding="application/x-tex">D{=}64</annotation></semantics></math>,
+a per-request rotation and permutation, decoy rows mixed among the real
+ones, and boundary clipping and noise. Each 80-row frame carries 32 real
+rows and 48 decoys. The implementation and the artefacts call these
+decoys <em>chaff</em>, after the radar countermeasure, and we use the
+two words interchangeably. The original evaluation declared the forward
+wire as the privacy surface, instrumented it, and passed its gate. The
+backward wire was outside the declared adversary view.</p>
+<p>Table <a href="#tab:setup" data-reference-type="ref"
+data-reference="tab:setup">1</a> sets out the evaluated configuration
+together with the replication and mitigation runs.</p>
+<div id="tab:setup">
+<table>
+<caption>Experimental setup for the main configuration and for the
+replication and mitigation runs. Full fingerprints identify the exact
+model weights and corpus used by the evaluated runner.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">field</th>
+<th style="text-align: left;">evaluated setup</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">model and runtime</td>
+<td style="text-align: left;">Qwen3-0.6B; Transformers 5.13.0 runtime;
+exact weights SHA-256
+<code>f47f71177f32bcd101b7573ec9171e6a57f4f4d31148d38e382306f42996874b</code></td>
+</tr>
+<tr>
+<td style="text-align: left;">topology</td>
+<td style="text-align: left;">Main configuration and replication runs:
+split after layer 14, resume at 26 (11 delegated layers). Mitigation
+runs: split 21/26 (4 delegated layers).</td>
+</tr>
+<tr>
+<td style="text-align: left;">corpus and implemented split</td>
+<td style="text-align: left;">WikiText-2; corpus SHA-256
+<code>78b6bfb90cfd718f0c27d42b1fd2231b139d1dda75d7d796e6a603b2e5cd7efe</code>.
+The runner tokenizes the flat corpus into disjoint, sequential
+fixed-width blocks, then slices train followed by evaluation; this is
+not a document-level split.</td>
+</tr>
+<tr>
+<td style="text-align: left;">frame and latent</td>
+<td style="text-align: left;">real
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>+</mi><annotation encoding="application/x-tex">+</annotation></semantics></math>
+48 decoy
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>=</mo><annotation encoding="application/x-tex">=</annotation></semantics></math>
+80 rows per frame;
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>64</mn></mrow><annotation encoding="application/x-tex">D{=}64</annotation></semantics></math>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">boundary protection</td>
+<td style="text-align: left;">Forward and returned activations: per-row
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mo>=</mo><mn>1.0</mn></mrow><annotation encoding="application/x-tex">C{=}1.0</annotation></semantics></math>
+and Gaussian
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>0.35</mn><mi>C</mi></mrow><annotation encoding="application/x-tex">\sigma{=}0.35C</annotation></semantics></math>.
+Main configuration and replication runs, outbound gradient: open.
+Mitigation outbound gradient:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mo>=</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">C{=}0.01</annotation></semantics></math>
+and Gaussian
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>0.35</mn><mi>C</mi></mrow><annotation encoding="application/x-tex">\sigma{=}0.35C</annotation></semantics></math>.</td>
+</tr>
+<tr>
+<td style="text-align: left;">known-plaintext latent probe</td>
+<td style="text-align: left;"><code>coordinate_plus_invariants</code>,
+<code>invariant_only</code>, and <code>invariant_graph</code>; 20
+epochs; batch 512; 3 restarts.</td>
+</tr>
+<tr>
+<td style="text-align: left;">captured frames per run</td>
+<td style="text-align: left;">Main configuration and replication runs:
+4,096
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>=</mo><annotation encoding="application/x-tex">=</annotation></semantics></math>
+2,048 probe-train
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>+</mi><annotation encoding="application/x-tex">+</annotation></semantics></math>
+2,048 evaluation. Mitigation runs: 1,024
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>=</mo><annotation encoding="application/x-tex">=</annotation></semantics></math>
+512 probe-train
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>+</mi><annotation encoding="application/x-tex">+</annotation></semantics></math>
+512 evaluation.</td>
+</tr>
+<tr>
+<td style="text-align: left;">seed groups</td>
+<td style="text-align: left;">–47 exploratory; 48–50 replication; 51–53
+mitigation.</td>
+</tr>
+<tr>
+<td style="text-align: left;">decision thresholds</td>
+<td style="text-align: left;">Privacy: gate statistic
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&gt;</mo><mi>+</mi><mn>1.0</mn></mrow><annotation encoding="application/x-tex">&gt; +1.0</annotation></semantics></math> pp
+fails. Utility: held-out cross-entropy increase
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≤</mo><mn>0.35</mn></mrow><annotation encoding="application/x-tex">\le 0.35</annotation></semantics></math> nats
+passes.</td>
+</tr>
+<tr>
+<td style="text-align: left;">inference</td>
+<td style="text-align: left;">Inferential unit: one independent training
+seed. Within-run uncertainty is frame-clustered.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The threat model is a fully compromised remote node: <span
+class="smallcaps">ucn</span> can read every message, state update, and
+cross-step observation on its own side. Prior split-learning work
+demonstrates passive reconstruction and label leakage as well as active
+backward-signal manipulation <span class="citation"
+data-cites="erdogan2022unsplit li2022labelleakage pasquini2021tiger"></span>.
+Accordingly, the declared adversary view has multiple channels, and a
+privacy claim is only as strong as the enumeration and testing of those
+channels. Figure <a href="#fig:twowire" data-reference-type="ref"
+data-reference="fig:twowire">1</a> depicts the protocol’s three hops,
+Figure <a href="#fig:anatomy" data-reference-type="ref"
+data-reference="fig:anatomy">2</a> expands one frame into its per-step
+anatomy, and Table <a href="#tab:trust" data-reference-type="ref"
+data-reference="tab:trust">[tab:trust]</a> records the trust split at
+the evaluated operating point.</p>
+<figure id="fig:twowire" data-latex-placement="H">
+<img src="figs/fig_twowire.png" />
+<figcaption>The three hops of one training step. Only <span
+class="smallcaps">tln</span> can compute the gradient, because only
+<span class="smallcaps">tln</span> holds the loss, so hop 3 travels left
+to right just as hop 1 does: “backward” names the pass the tensor
+belongs to, not the direction it moves. Hops 1 and 2 are clipped and
+noised, and the original evaluation attacked hop 1 and passed its gate.
+Hop 3 crossed raw and carried the leak. The zero-support signal is an
+implementation and system-design defect; the false pass is an
+uninstrumented-channel evaluation failure.</figcaption>
+</figure>
+<figure id="fig:anatomy" data-latex-placement="H">
+<img src="figs/fig_anatomy.png" />
+<figcaption>Anatomy of one training cycle, per frame. <span
+style="color: #5B2C91">SEALED</span> never crosses the boundary; <span
+style="color: #1E7D32">OBFUSCATED/PROTECTED</span> are the defence’s
+active layers; <span style="color: #B00020">LEAK</span> marks the
+unprotected backward wire and the partition mechanism it discloses. The
+forward probe passes at step 6 while steps 10 and 11 leak: the paper’s
+finding in one diagram.</figcaption>
+</figure>
+<div class="tabular">
+<table>
+<caption>Trust split at the evaluated operating point. The output gradient row is the omitted channel this paper is about.</caption>
+<thead><tr><th>TLN (trusted) keeps</th><th>UCN (compromised) sees/holds</th></tr></thead>
+<tbody>
+<tr><td>Private corpus; token IDs; plaintext I/O</td><td>Gauged D=64 frame rows only (80 rows/frame: 32 real + 48 decoy)</td></tr>
+<tr><td>Frozen LM prefix, embedding, LM tail</td><td>A ~100-parameter gauge-equivariant surrogate it trains itself</td></tr>
+<tr><td>Private encoder H→D=64 and decoder D→H weights</td><td><em>Unclipped, unnoised</em> D-width output gradients (the omitted channel)</td></tr>
+<tr><td>Per-request gauge masters (rotation, permutation, scale; SHA-256 counter-mode, 128-bit)</td><td>Protocol metadata: frame sizes, timing, session shape digests</td></tr>
+<tr><td>Honest evaluation labels; session keys; optimiser state for trusted parts</td><td>TLS 1.3 endpoints and ciphertext (pinned CA)</td></tr>
+<tr><td colspan="2"><em>Never</em> crosses: H-width activations, canonical coordinates, token order, token scale, plaintext tokens.</td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="terminology.">Terminology.</h4>
+<p>Four project terms appear throughout without prior-art homes, so we
+define them once here (no citations; they are constructs of this system,
+not borrowed results). A <em>seed</em> is the random seed initialising
+one training run and, through the KDF, every per-request gauge draw —
+the unit of independent replication. A <em>cell</em> is one complete
+experiment — a defence configuration, a seed, and a training budget, run
+end-to-end and then attacked and scored. A <em>battery</em> is a
+predeclared set of attacks scored as one sweep: the frozen nine-arm
+probe family (three model classes
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+three restarts) or the compromise-fraction sweep. A <em>surrogate</em>
+is the small gauge-equivariant module <span class="smallcaps">ucn</span>
+trains in place of the real middle layers
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math>100–161
+parameters) — a stand-in that computes on gauged frames without ever
+learning the gauges. Likewise: the <em>gate</em> is the predeclared
+decision threshold, the <em>floor</em> is the reading of a matched
+no-attack control, an <em>arm</em> is one scored attacker instance,
+<em>chaff</em> is the recycled real decoy rows, and a <em>gauge</em> is
+one fresh per-request randomisation (rotation, permutation, or
+scale).</p>
+<h1 id="sec:protocol">Evaluation protocol: declared channels, calibrated
+metrics, and the gate statistic</h1>
+<p>The gap this paper addresses is not discovery of gradient leakage or
+a bidirectional attack surface: both are established in
+gradient-inversion and split-learning work <span class="citation"
+data-cites="zhu2019deep deng2021tag bisr"></span>. The gap is a concrete
+evaluation returning a pass without testing whether its metrics can
+detect a known leak on every declared channel. We instantiate three
+established audit disciplines for that setting.</p>
+<h4 id="declare-every-channel.">Declare every channel.</h4>
+<p>The evaluation must enumerate all channels the adversary observes
+(forward, backward, membership, timing) before it measures any of them.
+A channel absent from the declared view is exempt from the gate by
+construction; the leak found here lived exactly in that exemption.
+Table <a href="#tab:channels" data-reference-type="ref"
+data-reference="tab:channels">2</a> records the enumeration and its
+current status. Its artefact sources and verification procedures are
+indexed in Appendix <a href="#app:artifacts" data-reference-type="ref"
+data-reference="app:artifacts">10</a>.</p>
+<div id="tab:channels">
+<table style="width:92%;">
+<caption>The declared channel families and their status. “Unmeasured”
+means the family has no applicable metric or no positive control, so it
+cannot support a primary claim.</caption>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 30%" />
+<col style="width: 26%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">family</th>
+<th style="text-align: left;">applicable metrics</th>
+<th style="text-align: left;">positive control</th>
+<th style="text-align: left;">status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>forward_only</code></td>
+<td style="text-align: left;"><code>token_top1</code>,
+<code>rare_token_top1</code>, <code>token_cross_entropy</code></td>
+<td style="text-align: left;">injected leak on the forward wire;
+codeword injection</td>
+<td style="text-align: left;">measured</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>gradient_only</code></td>
+<td style="text-align: left;"><code>token_top1</code>,
+<code>rare_token_top1</code>, <code>token_cross_entropy</code></td>
+<td style="text-align: left;">injected_leak on the backward wire</td>
+<td style="text-align: left;">measured</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>joint_forward_gradient</code></td>
+<td style="text-align: left;"><code>token_top1</code></td>
+<td style="text-align: left;">scaled joint concatenation (the
+exploratory frequent-token gradient result)</td>
+<td style="text-align: left;">measured</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>accumulated_history</code></td>
+<td style="text-align: left;"><code>token_top1</code></td>
+<td style="text-align: left;">none</td>
+<td style="text-align: left;">unmeasured (no positive control)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>stateful_remote_state</code></td>
+<td style="text-align: left;"><code>token_top1</code></td>
+<td style="text-align: left;">none</td>
+<td style="text-align: left;">unmeasured (no positive control)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>timing_metadata</code></td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: left;">unmeasured (no applicable metric)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>active_perturbation</code></td>
+<td style="text-align: left;"><code>token_cross_entropy</code></td>
+<td style="text-align: left;">amplitude sweep</td>
+<td style="text-align: left;">constructible, unexecuted</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>membership_property</code></td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: left;">unmeasured (no applicable metric)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>response_side</code></td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: left;">unmeasured (no applicable metric)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="calibrate-every-metric-against-a-known-leak.">Calibrate every
+metric against a known leak.</h4>
+<p>A metric certifies the absence of a leak only if it detects a leak
+injected on purpose. Section <a href="#sec:calibration"
+data-reference-type="ref" data-reference="sec:calibration">4</a>
+measures each metric’s detection threshold with a controlled
+dose–response sweep. A metric that has not been calibrated cannot stand
+between a privacy claim and a passing verdict. Planted canaries and
+attack-based privacy audits provide the methodological precedent <span
+class="citation"
+data-cites="carlini2019secret jagielski2020auditing nasr2023tight steinke2023onerun pillutla2023randomization"></span>;
+our adaptation makes the dose and decision channel- and
+metric-specific.</p>
+<h4 id="define-the-gate-statistic-and-paired-effects.">Define the gate
+statistic and paired effects.</h4>
+<p>Every attack result in this paper is a top-1 token accuracy: the
+share of evaluation tokens the attacker’s probe names correctly. We
+report it not as a raw accuracy but as the gap, in percentage points
+(pp), between the probe and a constant baseline that always guesses the
+single most frequent token in the evaluation set. That baseline sits
+near 5 to 6% for this model and corpus, so an effect of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">+1</annotation></semantics></math> pp
+means the attacker recovers roughly one extra token per hundred, about a
+sixth more than guessing alone would give. The gate is set at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.0</mn></mrow><annotation encoding="application/x-tex">+1.0</annotation></semantics></math> pp,
+and the effects measured here fall between about
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.5</mn></mrow><annotation encoding="application/x-tex">+0.5</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>2.3</mn></mrow><annotation encoding="application/x-tex">+2.3</annotation></semantics></math> pp.</p>
+<p>Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="script">𝒥</mi><annotation encoding="application/x-tex">\mathcal J</annotation></semantics></math>
+be the nine predeclared probe arms (three probe variants, each scored at
+three restarts; Table <a href="#tab:setup" data-reference-type="ref"
+data-reference="tab:setup">1</a>),
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>U</mi><mn>0.95</mn><mrow><mi mathvariant="normal">B</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">f</mi></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>j</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">U^{\mathrm{Bonf}}_{0.95}(\widehat p_j)</annotation></semantics></math>
+the Bonferroni-adjusted Wilson upper-95 accuracy for arm
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">t</mi></mrow></msub><annotation encoding="application/x-tex">\widehat p_{\mathrm{const}}</annotation></semantics></math>
+the point accuracy of the constant baseline, which always predicts the
+most frequent evaluation token. The historical gate statistic is
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi><mo>=</mo><munder><mi mathvariant="normal">max</mi><mrow><mi>j</mi><mo>∈</mo><mi mathvariant="script">𝒥</mi></mrow></munder><msubsup><mi>U</mi><mn>0.95</mn><mrow><mi mathvariant="normal">B</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">f</mi></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mi>j</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>−</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">t</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">\begin{equation}
+G = \max_{j\in\mathcal J} U^{\mathrm{Bonf}}_{0.95}(\widehat p_j)
+    - \widehat p_{\mathrm{const}} .
+\end{equation}</annotation></semantics></math> Thus the constant
+baseline is subtracted <em>after</em> the Wilson bound is formed;
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi><mo>&gt;</mo><mi>+</mi><mn>1.0</mn></mrow><annotation encoding="application/x-tex">G&gt;+1.0</annotation></semantics></math> pp
+fails the gate. For frame
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math>,
+define the paired difference
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="normal">Δ</mi><mi>f</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>q</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mrow><mi mathvariant="normal">acc</mi><mo>&#8289;</mo></mrow><mi>f</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>q</mi><mo stretchy="false" form="postfix">)</mo><mo>−</mo><msub><mrow><mi mathvariant="normal">acc</mi><mo>&#8289;</mo></mrow><mi>f</mi></msub><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">constant baseline</mtext><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">\begin{equation}
+\Delta_f(q)=\operatorname{acc}_f(q)-
+             \operatorname{acc}_f(\text{constant baseline}).
+\end{equation}</annotation></semantics></math> For a real arm
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
+and its shuffled-label negative control
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>,
+respectively,
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mo>=</mo><mfrac><mn>1</mn><mi>F</mi></mfrac><munderover><mo>∑</mo><mrow><mi>f</mi><mo>=</mo><mn>1</mn></mrow><mi>F</mi></munderover><msub><mi mathvariant="normal">Δ</mi><mi>f</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="2.0em"></mspace><mi>N</mi><mo>=</mo><mfrac><mn>1</mn><mi>F</mi></mfrac><munderover><mo>∑</mo><mrow><mi>f</mi><mo>=</mo><mn>1</mn></mrow><mi>F</mi></munderover><msub><mi mathvariant="normal">Δ</mi><mi>f</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>s</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">\begin{equation}
+A = \frac{1}{F}\sum_{f=1}^{F}\Delta_f(r),
+\qquad
+N = \frac{1}{F}\sum_{f=1}^{F}\Delta_f(s).
+\end{equation}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
+is the real-arm paired effect;
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
+is the same paired effect for the shuffled-label negative control.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
+is a false-positive check and is <em>not</em> subtracted inside
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>G</mi><annotation encoding="application/x-tex">G</annotation></semantics></math>.
+Within-run uncertainty bootstraps frames; reported across-seed
+contrasts, including
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mo>−</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">A-N</annotation></semantics></math>,
+use a hierarchical bootstrap over seeds (outer) and frames (inner).</p>
+<p>Three verdict terms recur throughout, and we fix them here. A result
+is <em>detected</em> when its lower bootstrap bound is positive or when
+exact support evidence establishes it; an arm is <em>at floor</em> when
+that bound includes zero, so the arm is indistinguishable from its
+constant baseline; and an arm <em>breaks the gate</em> when, and only
+when,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi><mo>&gt;</mo><mi>+</mi><mn>1.0</mn></mrow><annotation encoding="application/x-tex">G &gt; +1.0</annotation></semantics></math> pp
+under the Bonferroni–Wilson rule of Equation (1). “Detected” and “breaks
+the gate” are not synonyms: a paired effect can be detected well below
+the gate, and the gate can break on an upper bound whose point effect is
+smaller. We also call one (configuration, seed) run a <em>cell</em>, and
+one capture run’s serialised frames plus its metadata manifest a
+<em>bundle</em>.</p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>z</mi><annotation encoding="application/x-tex">z</annotation></semantics></math>-style
+row-independent statistics remain only for comparability with previously
+reported results of this system. Calibrated reference distributions and
+explicit operating points are established in membership-inference
+evaluation <span class="citation"
+data-cites="carlini2022lira song2021systematic"></span>; the
+shuffled-label negative control is their channel-specific counterpart
+here.</p>
+<h1 id="sec:calibration">Instrument calibration</h1>
+<p>Calibration is per metric: thresholds are set only after each
+metric’s detection curve is measured. The sweep injects a known token
+leak at controlled dose (coverage
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+amplitude) and reads where each metric detects it.</p>
+<h2 id="the-four-metrics-disagree">The four metrics disagree</h2>
+<p>Figure <a href="#fig:dose" data-reference-type="ref"
+data-reference="fig:dose">3</a> and Table <a href="#tab:dose"
+data-reference-type="ref" data-reference="tab:dose">3</a> show the
+dose–response curves. <code>token_top1</code> has a sharp onset between
+coverage 0.04 and 0.06, steepening through 0.10.
+<code>rare_token_top1</code> is the most sensitive, first responding at
+coverage 0.04 and reaching full recovery at coverage 1.0.
+<code>token_cross_entropy</code> is dose-insensitive until the injected
+leak dominates. <code>membership_auc</code> is insensitive over the
+tested low- and moderate-dose region
+(AUC<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.5</mn></mrow><annotation encoding="application/x-tex">-0.5</annotation></semantics></math>
+spans
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.058</mn><annotation encoding="application/x-tex">0.058</annotation></semantics></math>–<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.159</mn><annotation encoding="application/x-tex">0.159</annotation></semantics></math>
+across the full sweep), because the injected leak is a token-identity
+signal, not a membership signal; the metric was subsequently falsified
+as a channel and retained as a probe-generalisation diagnostic only.</p>
+<p>The curves disagree, consistent with broader evidence that
+reconstruction metrics need not agree on privacy risk <span
+class="citation" data-cites="sun2023metrics"></span>, so no single
+threshold fits all metrics. The thresholds (Table <a
+href="#tab:thresholds" data-reference-type="ref"
+data-reference="tab:thresholds">4</a>) are set per metric, and they are
+budget- and frame-invariant along the remaining sweep axes. Calibration
+changed how the decision is interpreted, not the gate formula: three
+cells later shown to be degenerate (arm identical to the constant
+baseline row-for-row) had pinned the statistical floor, and the sweep
+measures that false-negative region while preserving the historical
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.0</mn></mrow><annotation encoding="application/x-tex">+1.0</annotation></semantics></math> pp
+Bonferroni–Wilson rule. The frequent-token effect is detected on every
+seed
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
+from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.69</mn></mrow><annotation encoding="application/x-tex">+0.69</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.19</mn></mrow><annotation encoding="application/x-tex">+1.19</annotation></semantics></math> pp,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">|</mo><mi>N</mi><mo stretchy="false" form="prefix">|</mo><mo>≤</mo><mn>0.08</mn></mrow><annotation encoding="application/x-tex">|N|\le
+0.08</annotation></semantics></math> pp); explicit gate breaks are
+reported only where the Bonferroni–Wilson column exceeds
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.0</mn></mrow><annotation encoding="application/x-tex">+1.0</annotation></semantics></math> pp
+(Section <a href="#sec:results" data-reference-type="ref"
+data-reference="sec:results">5</a>).</p>
+<figure id="fig:dose" data-latex-placement="H">
+<embed src="figs/fig_w24_dose.png" />
+<figcaption>Dose–response per metric on the coordinate-mode sweep
+(amplitude 1.0). The four emitting metrics disagree:
+<code>rare_token_top1</code> is most sensitive;
+<code>token_cross_entropy</code> barely moves until the leak dominates;
+<code>membership_auc</code> does not detect the low-dose token signal
+because the injection is not a membership signal. A single calibration
+run across 19 doses.</figcaption>
+</figure>
+<div id="tab:dose">
+<table>
+<caption>Coordinate-mode coverage sweep at amplitude 1.0. The
+calibration reference is the zero-dose source cell (coverage 0, same
+bundle family) and the constant baseline (the most common evaluation
+token); the calibration sweep contains no shuffled-label arm, because
+those negative controls are introduced only at scoring time. The top-1
+rows show point effects, while the gate statistic uses their
+Bonferroni–Wilson upper-95 value; thus the gate first breaks at coverage
+0.06 although the displayed point effect is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.98</mn><annotation encoding="application/x-tex">0.98</annotation></semantics></math> pp.
+Cross-entropy is a proper scoring rule; the values shown are the effect
+over the constant baseline, and at scoring time CE is read arm minus its
+shuffled-label negative control, never raw (Table <a
+href="#tab:thresholds" data-reference-type="ref"
+data-reference="tab:thresholds">4</a>). <code>membership_auc</code>
+values are flat. “—” marks the amplitude-axis section, not part of this
+row.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">metric</th>
+<th style="text-align: right;">cov 0.02</th>
+<th style="text-align: right;">0.04</th>
+<th style="text-align: right;">0.06</th>
+<th style="text-align: right;">0.10</th>
+<th style="text-align: right;">0.30</th>
+<th style="text-align: right;">1.00</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>token_top1</code> (pp)</td>
+<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">0.98</td>
+<td style="text-align: right;">4.19</td>
+<td style="text-align: right;">22.51</td>
+<td style="text-align: right;">94.88</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>rare_token_top1</code> (pp)</td>
+<td style="text-align: right;">0.08</td>
+<td style="text-align: right;">0.32</td>
+<td style="text-align: right;">0.67</td>
+<td style="text-align: right;">1.97</td>
+<td style="text-align: right;">14.18</td>
+<td style="text-align: right;">100.0</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>token_cross_entropy</code></td>
+<td style="text-align: right;">1.114</td>
+<td style="text-align: right;">1.114</td>
+<td style="text-align: right;">1.114</td>
+<td style="text-align: right;">1.115</td>
+<td style="text-align: right;">1.130</td>
+<td style="text-align: right;">7.025</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>membership_auc</code>
+(AUC<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.5</mn></mrow><annotation encoding="application/x-tex">-0.5</annotation></semantics></math>)</td>
+<td style="text-align: right;">0.093</td>
+<td style="text-align: right;">0.093</td>
+<td style="text-align: right;">0.095</td>
+<td style="text-align: right;">0.095</td>
+<td style="text-align: right;">0.096</td>
+<td style="text-align: right;">—</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="tab:thresholds">
+<table>
+<caption>Per-metric thresholds, set in advance. A metric without a
+measured detection curve may not appear in a primary claim.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">metric</th>
+<th style="text-align: left;">threshold set in advance</th>
+<th style="text-align: left;">basis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>token_top1</code></td>
+<td style="text-align: left;">gate: Bonferroni upper-95 excess
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&gt;</mo><mi>+</mi><mn>1.0</mn></mrow><annotation encoding="application/x-tex">&gt;+1.0</annotation></semantics></math>
+pp</td>
+<td style="text-align: left;">first displayed gate break at
+cov. 0.06</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>rare_token_top1</code></td>
+<td style="text-align: left;">paired effect
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.0</mn></mrow><annotation encoding="application/x-tex">+1.0</annotation></semantics></math>
+pp; report raw recovery</td>
+<td style="text-align: left;">earliest subthreshold movement at
+cov. 0.04</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>token_cross_entropy</code></td>
+<td style="text-align: left;">none set; read arm minus shuffled-label
+negative control (never raw)</td>
+<td style="text-align: left;">a confidently-wrong negative control
+inverts raw CE; no numerical gate</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>membership_auc</code></td>
+<td style="text-align: left;">none (diagnostic only)</td>
+<td style="text-align: left;">falsified as a channel; constant baseline
+vacuous</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="sec:positive_control">The representation-matched positive
+control</h2>
+<p>A floor reading is interpretable only if the same probe succeeds on a
+representation-matched undefended control. The isolation-audit bundles
+do not provide that control because their naked boundary is a different
+representation and the probe remained near floor there. For the split-14
+claims, the positive control therefore uses the split-14 naked capture
+and a probe built to detect it: a four-layer, eight-head Transformer
+encoder trained 50 epochs to map each released latent row back to its
+token . Appendix <a href="#app:artifacts" data-reference-type="ref"
+data-reference="app:artifacts">10</a> indexes the associated
+artefacts.</p>
+<div id="tab:positive_control">
+<table>
+<caption>One probe architecture, one protocol, three boundaries. The
+probe that inverts the naked boundary at over six times its baseline
+reads nothing through the defence, at the operating width <em>and</em>
+at matched width, so the defended floor readings are not attacker
+blindness. Best accuracy is selected on the evaluation set over 50
+epochs (a selection reading); the accuracy column reports its Wilson
+upper-95 bound, so each row’s excess is the displayed accuracy minus the
+baseline. The defended probes’ accuracy declines after its early epochs,
+consistent with overfitting noise rather than extracted signal. The
+committed three-restart rerun of the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>64</mn></mrow><annotation encoding="application/x-tex">D{=}64</annotation></semantics></math>
+defended probe reads at the same floor
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.37</mn></mrow><annotation encoding="application/x-tex">+0.37</annotation></semantics></math> pp);
+the other three committed deep-probe runs are the rows above.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">boundary</th>
+<th style="text-align: center;">Wilson upper-95 acc. </th>
+<th style="text-align: center;">constant baseline</th>
+<th style="text-align: center;">excess</th>
+<th style="text-align: left;">note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">naked
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>1024</mn></mrow><annotation encoding="application/x-tex">D{=}1024</annotation></semantics></math>,
+no defence)</td>
+<td style="text-align: center;"><strong>28.54%</strong></td>
+<td style="text-align: center;">4.35%</td>
+<td
+style="text-align: center;"><strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>24.19</mn></mrow><annotation encoding="application/x-tex">+24.19</annotation></semantics></math>
+pp</strong></td>
+<td style="text-align: left;">breaks</td>
+</tr>
+<tr>
+<td style="text-align: left;">defended
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>64</mn></mrow><annotation encoding="application/x-tex">D{=}64</annotation></semantics></math>,
+noise, decoys)</td>
+<td style="text-align: center;">5.56%</td>
+<td style="text-align: center;">5.27%</td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.29</mn></mrow><annotation encoding="application/x-tex">+0.29</annotation></semantics></math>
+pp</td>
+<td style="text-align: left;">at floor</td>
+</tr>
+<tr>
+<td style="text-align: left;">defended
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>1024</mn></mrow><annotation encoding="application/x-tex">D{=}1024</annotation></semantics></math>,
+dimension-matched)</td>
+<td style="text-align: center;">5.56%</td>
+<td style="text-align: center;">5.29%</td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.27</mn></mrow><annotation encoding="application/x-tex">+0.27</annotation></semantics></math>
+pp</td>
+<td style="text-align: left;">at floor</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The naked break selects the best epoch on the evaluation set, so
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>24.19</mn></mrow><annotation encoding="application/x-tex">+24.19</annotation></semantics></math> pp
+is a sensitivity demonstration, not a primary leak estimate; and the
+defended frame carries 80 rows against the naked frame’s 32, matching
+the study’s evaluation convention. What the contrast establishes is
+narrow and load-bearing: an attacker architecture proven sensitive to
+the representation reads nothing through the defence, while an attacker
+family that could not read even the naked boundary could never have
+shown it. Boundary-specificity is measured: re-run on the packaged
+isolation-audit bundle, the same probe reads the naked boundary at floor
+as well
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.66</mn></mrow><annotation encoding="application/x-tex">+0.66</annotation></semantics></math> pp,
+its shuffled-label negative control at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.50</mn></mrow><annotation encoding="application/x-tex">+0.50</annotation></semantics></math>).
+This is exactly why a positive control must be representation-matched to
+the cell under test, and why the split-14 capture above is the control
+for the split-14 claims.</p>
+<h1 id="sec:results">Results: structural gradient leakage and bounded
+content inference</h1>
+<p>Table <a href="#tab:summary" data-reference-type="ref"
+data-reference="tab:summary">6</a> summarises the main configuration and
+the result categories developed in this section; availability and
+verification details are indexed in Appendix <a href="#app:artifacts"
+data-reference-type="ref" data-reference="app:artifacts">10</a>.</p>
+<div id="tab:summary">
+<table>
+<caption>Result categories and where each is established. The final row
+refers to the four-layer mitigation topology; every row above it refers
+to the primary configuration.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">result category</th>
+<th style="text-align: left;">result</th>
+<th style="text-align: left;">interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">forward wire</td>
+<td style="text-align: left;">gate passed</td>
+<td style="text-align: left;">the original instrument’s only
+channel</td>
+</tr>
+<tr>
+<td style="text-align: left;">backward wire</td>
+<td style="text-align: left;">leaks structurally</td>
+<td style="text-align: left;">,096/4,096 frames; row agreement 1.000, on
+each of nine seeds</td>
+</tr>
+<tr>
+<td style="text-align: left;">frequent-token content effect</td>
+<td style="text-align: left;">pooled over the nine verified seeds:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.92</mn></mrow><annotation encoding="application/x-tex">+0.92</annotation></semantics></math> pp,
+95% interval
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0.74</mn><mo>,</mo><mn>1.09</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0.74, 1.09]</annotation></semantics></math></td>
+<td style="text-align: left;">negative control at floor on every seed;
+per-seed values in Table <a href="#tab:sixseed"
+data-reference-type="ref" data-reference="tab:sixseed">7</a></td>
+</tr>
+<tr>
+<td style="text-align: left;">nine audit cells</td>
+<td style="text-align: left;">effect detected at 12 and 11 delegated
+layers, at floor at 8 and 6; detected at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>64</mn></mrow><annotation encoding="application/x-tex">D{=}64</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>96</mn></mrow><annotation encoding="application/x-tex">D{=}96</annotation></semantics></math>,
+at floor at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>128</mn></mrow><annotation encoding="application/x-tex">D{=}128</annotation></semantics></math>;
+2.5<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+more exposure does not amplify</td>
+<td style="text-align: left;">one run each (seed 42); partition exact at
+every depth</td>
+</tr>
+<tr>
+<td style="text-align: left;">dose–response calibration</td>
+<td style="text-align: left;"><code>token_top1</code> onset
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>∼</mo><annotation encoding="application/x-tex">\sim</annotation></semantics></math>0.04–0.06;
+<code>rare_token_top1</code> at 0.04; <code>CE</code> flat until
+dominant; <code>membership_auc</code> flat and dose-insensitive</td>
+<td style="text-align: left;">per-metric thresholds set in advance</td>
+</tr>
+<tr>
+<td style="text-align: left;">internal scorer reimplementation</td>
+<td style="text-align: left;">all nine cells
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≤</mo><msup><mn>10</mn><mrow><mi>−</mi><mn>6</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\le 10^{-6}</annotation></semantics></math>
+pp</td>
+<td style="text-align: left;">internal check (Appendix <a
+href="#app:artifacts" data-reference-type="ref"
+data-reference="app:artifacts">10</a>)</td>
+</tr>
+<tr>
+<td style="text-align: left;">mitigation runs</td>
+<td style="text-align: left;">joint view breaks the gate on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>6</mn><mi>/</mi><mn>6</mn></mrow><annotation encoding="application/x-tex">6/6</annotation></semantics></math>
+defended cells across two datasets; gradient clipping and Gaussian noise
+suppress the scored probes for a held-out cost of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≈</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">\approx 0.01</annotation></semantics></math>
+nats</td>
+<td style="text-align: left;">under the fixed protocol; four-layer
+topology</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="sec:mechanism">Mechanism: the gradient says which rows are
+decoys</h2>
+<p>A decoy row’s gradient is identically zero, because the trusted-side
+loss truncates before the decoys. With the gradient unprotected, the
+zero-support pattern of each returned gradient frame exactly repeats the
+split between real rows and decoys. On every one of 4,096 frames, on
+every seed, the match is exact: <strong>4,096/4,096 frames; row-level
+agreement 1.000</strong>. The corresponding per-seed artefacts are
+indexed in Appendix <a href="#app:artifacts" data-reference-type="ref"
+data-reference="app:artifacts">10</a>.</p>
+<p>The result has three claim levels.</p>
+<h4 id="i-structural-metadata-leakage.">(i) Structural metadata
+leakage.</h4>
+<p>Gradient support discloses exactly which rows are real: the cloud can
+separate every loss-bearing row from every decoy row in every evaluated
+frame. This is the disclosure the backward wire is uniquely responsible
+for.</p>
+<h4 id="ii-content-inference.">(ii) Content inference.</h4>
+<p>Conditioned on that structural signal, the pre-set frequent-token
+probe has a modest paired effect. The gradient’s contribution here is
+small: comparing the gradient and forward arms of Table <a
+href="#tab:sixseed" data-reference-type="ref"
+data-reference="tab:sixseed">7</a> seed by seed, the gradient’s margin
+over the oracle-partitioned forward frame is at most
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.18</mn></mrow><annotation encoding="application/x-tex">+0.18</annotation></semantics></math> pp
+on five of the six exploratory seeds
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.0011</mn></mrow><annotation encoding="application/x-tex">+0.0011</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.0395</mn></mrow><annotation encoding="application/x-tex">+0.0395</annotation></semantics></math>
+on four of them), and reaches
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.64</mn></mrow><annotation encoding="application/x-tex">+0.64</annotation></semantics></math> pp
+only on seed 42. The content an attacker reads therefore sits largely in
+the forward frame, and what the backward wire supplies is the partition
+that makes the frame readable, which is claim (i), not additional
+content. This probe result is content inference; it is not evidence of
+transcript or sequence reconstruction.</p>
+<h4 id="iii-not-established.">(iii) Not established.</h4>
+<p>The experiments do not establish rare-token recovery, sequence
+reconstruction, or held-out-text reconstruction. Those claims require
+different emitters and controls and remain outside the measured
+result.</p>
+<p>The cycle in which this happens is Figure <a href="#fig:anatomy"
+data-reference-type="ref" data-reference="fig:anatomy">2</a>, steps 9 to
+11. Table <a href="#tab:sixseed" data-reference-type="ref"
+data-reference="tab:sixseed">7</a> reports the exploratory and
+replication runs.</p>
+<div id="tab:sixseed">
+<table>
+<caption>Exploratory seeds 42–47 and the replication runs (seeds 48–50).
+Statistic: the paired effect of each arm over its constant baseline (the
+most frequent evaluation token), clustered by frame. The
+negative-control column reports the label-shuffled twin of the gradient
+arm, scored through the same statistic. Inferential unit: one training
+seed; each row one independent run, its interval a cluster bootstrap
+over that run’s frames. All nine committed seeds are shown. <em>The
+forward arm is built on the oracle real/decoy split</em> and therefore
+does not by itself describe an achievable attack. It is reported here
+because in this system the oracle is redundant: the gradient reproduces
+the partition exactly (Section <a href="#sec:mechanism"
+data-reference-type="ref" data-reference="sec:mechanism">5.1</a>), so
+the forward arm is what an attacker reads <em>after</em> the backward
+wire has supplied the partition. No label-shuffled control was run for
+the forward arm, so that column is uncontrolled; the negative-control
+column bounds the gradient arm only. Seed 42 was served by a cloud
+container built before the code was packaged for release; seeds 43–47
+ran the released package on both nodes, and seeds 48–50 are captures
+made under the fixed protocol.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">seed</th>
+<th style="text-align: center;">gradient arm (pp)</th>
+<th style="text-align: center;">forward arm (pp)</th>
+<th style="text-align: center;">negative control (pp)</th>
+<th style="text-align: center;">frames exact</th>
+<th style="text-align: center;">verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">42</td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.1923</mn></mrow><annotation encoding="application/x-tex">+1.1923</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.5516</mn></mrow><annotation encoding="application/x-tex">+0.5516</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.0069</mn></mrow><annotation encoding="application/x-tex">-0.0069</annotation></semantics></math></td>
+<td style="text-align: center;"><strong>4,096/4,096</strong></td>
+<td style="text-align: center;">detected</td>
+</tr>
+<tr>
+<td style="text-align: left;">43</td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.6893</mn></mrow><annotation encoding="application/x-tex">+0.6893</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.6821</mn></mrow><annotation encoding="application/x-tex">+0.6821</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.0231</mn></mrow><annotation encoding="application/x-tex">-0.0231</annotation></semantics></math></td>
+<td style="text-align: center;"><strong>4,096/4,096</strong></td>
+<td style="text-align: center;">detected</td>
+</tr>
+<tr>
+<td style="text-align: left;">44</td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.6929</mn></mrow><annotation encoding="application/x-tex">+0.6929</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.6918</mn></mrow><annotation encoding="application/x-tex">+0.6918</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.0479</mn></mrow><annotation encoding="application/x-tex">+0.0479</annotation></semantics></math></td>
+<td style="text-align: center;"><strong>4,096/4,096</strong></td>
+<td style="text-align: center;">detected</td>
+</tr>
+<tr>
+<td style="text-align: left;">45</td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.8435</mn></mrow><annotation encoding="application/x-tex">+0.8435</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.8040</mn></mrow><annotation encoding="application/x-tex">+0.8040</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.0707</mn></mrow><annotation encoding="application/x-tex">-0.0707</annotation></semantics></math></td>
+<td style="text-align: center;"><strong>4,096/4,096</strong></td>
+<td style="text-align: center;">detected</td>
+</tr>
+<tr>
+<td style="text-align: left;">46</td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.9361</mn></mrow><annotation encoding="application/x-tex">+0.9361</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.7578</mn></mrow><annotation encoding="application/x-tex">+0.7578</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.0285</mn></mrow><annotation encoding="application/x-tex">-0.0285</annotation></semantics></math></td>
+<td style="text-align: center;"><strong>4,096/4,096</strong></td>
+<td style="text-align: center;">detected</td>
+</tr>
+<tr>
+<td style="text-align: left;">47</td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.7705</mn></mrow><annotation encoding="application/x-tex">+0.7705</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.7618</mn></mrow><annotation encoding="application/x-tex">+0.7618</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.0308</mn></mrow><annotation encoding="application/x-tex">-0.0308</annotation></semantics></math></td>
+<td style="text-align: center;"><strong>4,096/4,096</strong></td>
+<td style="text-align: center;">detected</td>
+</tr>
+<tr>
+<td style="text-align: left;">mean</td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.8541</mn></mrow><annotation encoding="application/x-tex">+0.8541</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.7082</mn></mrow><annotation encoding="application/x-tex">+0.7082</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">|</mo><mi>⋅</mi><mo stretchy="false" form="prefix">|</mo><mo>≤</mo><mn>0.08</mn></mrow><annotation encoding="application/x-tex">|\cdot| \le 0.08</annotation></semantics></math></td>
+<td style="text-align: center;"><strong>4,096/4,096</strong></td>
+<td style="text-align: center;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;">48 (fixed protocol)</td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.6456</mn></mrow><annotation encoding="application/x-tex">+0.6456</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.5023</mn></mrow><annotation encoding="application/x-tex">+0.5023</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.0571</mn></mrow><annotation encoding="application/x-tex">-0.0571</annotation></semantics></math></td>
+<td style="text-align: center;"><strong>4,096/4,096</strong></td>
+<td style="text-align: center;">detected</td>
+</tr>
+<tr>
+<td style="text-align: left;">49 (fixed protocol)</td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.5008</mn></mrow><annotation encoding="application/x-tex">+1.5008</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.8721</mn></mrow><annotation encoding="application/x-tex">+0.8721</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.0232</mn></mrow><annotation encoding="application/x-tex">+0.0232</annotation></semantics></math></td>
+<td style="text-align: center;"><strong>4,096/4,096</strong></td>
+<td style="text-align: center;">detected</td>
+</tr>
+<tr>
+<td style="text-align: left;">50 (fixed protocol)</td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.9929</mn></mrow><annotation encoding="application/x-tex">+0.9929</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.6326</mn></mrow><annotation encoding="application/x-tex">+0.6326</annotation></semantics></math></td>
+<td
+style="text-align: center;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.0650</mn></mrow><annotation encoding="application/x-tex">+0.0650</annotation></semantics></math></td>
+<td style="text-align: center;"><strong>4,096/4,096</strong></td>
+<td style="text-align: center;">detected</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="what-this-does-and-does-not-establish">What this does, and does
+not, establish</h2>
+<p>The exact partition and the modest frequent-token paired effect are
+detected under a shuffled-label negative-control protocol the audited
+evaluations do not run. It establishes that a gate that never declares
+the backward channel cannot see the partition signal. The originally
+published gate would also have passed this cell under its own threshold.
+The structural disclosure was invisible to it twice over: the channel
+was never scored, and the floor the threshold was calibrated against was
+degenerate (Section <a href="#sec:calibration" data-reference-type="ref"
+data-reference="sec:calibration">4</a>).</p>
+<h2 id="sec:confirmatory">Does the leak survive a configuration worth
+deploying?</h2>
+<p>The main configuration fails its own utility gate: it protects the
+data but costs too much model quality to be worth running. That leaves
+an objection. If the leak only appears in a configuration nobody would
+deploy, it may not matter. This section answers that objection with a
+second set of runs on a configuration that does pass both gates, so the
+leak cannot be dismissed as an artefact of an unusable setting.</p>
+<p>These runs use a shallower split, delegating four transformer layers
+instead of eleven. They were run on three fresh seeds (51 to 53) from
+the released code, and scored against the thresholds set in advance, so
+nothing about them was tuned after the fact.</p>
+<p>Table <a href="#tab:confirmatory" data-reference-type="ref"
+data-reference="tab:confirmatory">8</a> reports every run in the
+mitigation set.</p>
+<div id="tab:confirmatory">
+<table>
+<caption>The mitigation runs. The gate columns report the gate
+statistic: Bonferroni-upper-95 excess over the constant baseline. The
+paired column is the cluster-bootstrapped paired effect of the best arm
+against its constant baseline. “Joint arm” is the forward frame and the
+output gradient of the same training step, concatenated: the view the
+compromised node actually holds, and the one the original gate never
+scored. This set comprises fourteen runs; the twelve scored cells are
+shown. The two omitted are a configuration smoke test that produced no
+scored arms and the packaged seed-42 rerun of the main configuration,
+reported separately in this section.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi></mi><mo>†</mo></msup><annotation encoding="application/x-tex">^{\dagger}</annotation></semantics></math>The
+naked control on seed 53 fails the utility gate
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Δ</mi><annotation encoding="application/x-tex">\Delta</annotation></semantics></math>
+loss
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.432</mn><annotation encoding="application/x-tex">0.432</annotation></semantics></math>
+against the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.35</mn><annotation encoding="application/x-tex">0.35</annotation></semantics></math>
+bound); it is retained because it is a deliberately undefended
+sensitivity control, not a candidate configuration. <em>In every one of
+these runs the per-row scale-and-sign gauge was disabled</em>, as it is
+for the rotation-invariant cloud architectures (Appendix <a
+href="#app:stack" data-reference-type="ref"
+data-reference="app:stack">11</a>); the joint-view results below are
+conditional on that setting.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">cell (seed)</th>
+<th style="text-align: left;">utility
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Δ</mi><annotation encoding="application/x-tex">\Delta</annotation></semantics></math></th>
+<th style="text-align: left;">forward gate</th>
+<th style="text-align: left;">joint arm (gate)</th>
+<th style="text-align: left;">joint arm (paired effect)</th>
+<th style="text-align: left;">support leak</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">defended, gradient open (s51)</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.054</mn></mrow><annotation encoding="application/x-tex">+0.054</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.522</mn></mrow><annotation encoding="application/x-tex">+0.522</annotation></semantics></math></td>
+<td
+style="text-align: left;"><strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.954</mn></mrow><annotation encoding="application/x-tex">+1.954</annotation></semantics></math></strong></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.609</mn></mrow><annotation encoding="application/x-tex">+1.609</annotation></semantics></math></td>
+<td style="text-align: left;"><strong>1,024/1,024</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">defended, gradient open (s52)</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.063</mn></mrow><annotation encoding="application/x-tex">+0.063</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.574</mn></mrow><annotation encoding="application/x-tex">+0.574</annotation></semantics></math></td>
+<td
+style="text-align: left;"><strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>2.180</mn></mrow><annotation encoding="application/x-tex">+2.180</annotation></semantics></math></strong></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>2.333</mn></mrow><annotation encoding="application/x-tex">+2.333</annotation></semantics></math></td>
+<td style="text-align: left;"><strong>1,024/1,024</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">defended, gradient open (s53)</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.071</mn></mrow><annotation encoding="application/x-tex">+0.071</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.412</mn></mrow><annotation encoding="application/x-tex">+0.412</annotation></semantics></math></td>
+<td
+style="text-align: left;"><strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.765</mn></mrow><annotation encoding="application/x-tex">+1.765</annotation></semantics></math></strong></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.567</mn></mrow><annotation encoding="application/x-tex">+1.567</annotation></semantics></math></td>
+<td style="text-align: left;"><strong>1,024/1,024</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">defended, gradient clipped and noised
+(s51)</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.063</mn></mrow><annotation encoding="application/x-tex">+0.063</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.406</mn></mrow><annotation encoding="application/x-tex">+0.406</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.480</mn></mrow><annotation encoding="application/x-tex">+0.480</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.204</mn></mrow><annotation encoding="application/x-tex">-0.204</annotation></semantics></math></td>
+<td style="text-align: left;"><strong>0/1,024</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">defended, gradient clipped and noised
+(s52)</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.078</mn></mrow><annotation encoding="application/x-tex">+0.078</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.421</mn></mrow><annotation encoding="application/x-tex">+0.421</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.476</mn></mrow><annotation encoding="application/x-tex">+0.476</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.017</mn></mrow><annotation encoding="application/x-tex">-0.017</annotation></semantics></math></td>
+<td style="text-align: left;"><strong>0/1,024</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">defended, gradient clipped and noised
+(s53)</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.083</mn></mrow><annotation encoding="application/x-tex">+0.083</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.412</mn></mrow><annotation encoding="application/x-tex">+0.412</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.481</mn></mrow><annotation encoding="application/x-tex">+0.481</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.013</mn></mrow><annotation encoding="application/x-tex">-0.013</annotation></semantics></math></td>
+<td style="text-align: left;"><strong>0/1,024</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">public corpus, gradient open (s51)</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.092</mn></mrow><annotation encoding="application/x-tex">+0.092</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.385</mn></mrow><annotation encoding="application/x-tex">+0.385</annotation></semantics></math></td>
+<td
+style="text-align: left;"><strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.632</mn></mrow><annotation encoding="application/x-tex">+1.632</annotation></semantics></math></strong></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.986</mn></mrow><annotation encoding="application/x-tex">+0.986</annotation></semantics></math></td>
+<td style="text-align: left;"><strong>1,024/1,024</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">public corpus, gradient open (s52)</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.080</mn></mrow><annotation encoding="application/x-tex">+0.080</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.767</mn></mrow><annotation encoding="application/x-tex">+0.767</annotation></semantics></math></td>
+<td
+style="text-align: left;"><strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.607</mn></mrow><annotation encoding="application/x-tex">+1.607</annotation></semantics></math></strong></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.942</mn></mrow><annotation encoding="application/x-tex">+0.942</annotation></semantics></math></td>
+<td style="text-align: left;"><strong>1,024/1,024</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">public corpus, gradient open (s53)</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.083</mn></mrow><annotation encoding="application/x-tex">+0.083</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.483</mn></mrow><annotation encoding="application/x-tex">+0.483</annotation></semantics></math></td>
+<td
+style="text-align: left;"><strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.435</mn></mrow><annotation encoding="application/x-tex">+1.435</annotation></semantics></math></strong></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.750</mn></mrow><annotation encoding="application/x-tex">+0.750</annotation></semantics></math></td>
+<td style="text-align: left;"><strong>1,024/1,024</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">naked control (s51–s53)</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.00</mn><mi>/</mi><mo>+</mo><mn>0.12</mn><mi>/</mi><mo>+</mo><msup><mn>0.43</mn><mo>†</mo></msup></mrow><annotation encoding="application/x-tex">+0.00/+0.12/+0.43^{\dagger}</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>9.5</mn></mrow><annotation encoding="application/x-tex">+9.5</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>10.7</mn></mrow><annotation encoding="application/x-tex">+10.7</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>33.9</mn></mrow><annotation encoding="application/x-tex">+33.9</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>34.0</mn></mrow><annotation encoding="application/x-tex">+34.0</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≈</mo><mi>+</mi><mn>51</mn></mrow><annotation encoding="application/x-tex">\approx +51</annotation></semantics></math></td>
+<td style="text-align: left;">—</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>(a) <strong>The joint-view gate result is not confined to a
+utility-failing configuration.</strong> On all six defended,
+gradient-open cells (three seeds on each of two datasets) the run passes
+the forward privacy gate <em>and</em> the utility gate, and the joint
+view still breaks the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.0</mn></mrow><annotation encoding="application/x-tex">+1.0</annotation></semantics></math> pp
+gate set in advance, while the gradient on its own stays at the level of
+guessing.</p>
+<p>(b) <strong>The mitigation removes the zero-support partition
+signal.</strong> With per-row gradient clipping and Gaussian noise,
+every scored arm sits at floor and the structural partition disclosure
+is gone: 0/1,024 frames, agreement
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.400</mn><annotation encoding="application/x-tex">0.400</annotation></semantics></math>
+at the 32/80 base rate. Utility is intact, at a held-out cost of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≈</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">\approx 0.01</annotation></semantics></math> nats.</p>
+<p>(c) <strong>The naked control restores the signal.</strong> The same
+topology with the defence off reads
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>34</mn></mrow><annotation encoding="application/x-tex">+34</annotation></semantics></math> pp
+on the joint view, so the defended cells’ near-floor readings reflect
+the defence rather than a blind instrument. On the forward gate the
+defended cells sit at floor while the naked cells exceed it by roughly
+ten pp, separating the two configurations by more than an order of
+magnitude.</p>
+<p><strong>Cross-Gram cancellation does not explain the joint-view
+result.</strong> The forward activation matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
+and its returned gradient
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>G</mi><annotation encoding="application/x-tex">G</annotation></semantics></math>
+share the per-request rotation, so their cross-Gram product
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><msup><mi>G</mi><mi>T</mi></msup></mrow><annotation encoding="application/x-tex">XG^{T}</annotation></semantics></math>
+cancels it. The pre-set probe family did not compute this cross-tensor
+feature. We implemented it (cosine and scale-keeping forms, with
+rotation-invariance self-tests) and scored it on every captured cell: it
+reads at floor everywhere, defended (gate statistic
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.31</mn></mrow><annotation encoding="application/x-tex">+0.31</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.86</mn></mrow><annotation encoding="application/x-tex">+0.86</annotation></semantics></math>,
+paired effect
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.29</mn></mrow><annotation encoding="application/x-tex">-0.29</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.46</mn></mrow><annotation encoding="application/x-tex">+0.46</annotation></semantics></math>)
+and naked alike (paired effect
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.78</mn></mrow><annotation encoding="application/x-tex">-0.78</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>0.22</mn></mrow><annotation encoding="application/x-tex">-0.22</annotation></semantics></math>).
+Under the two implemented emitters, the joint-view effect therefore runs
+through the concatenated gradient block’s own content, not through the
+rotation-cancelling cross-term; other cross-tensor attacks remain
+open.</p>
+<p><strong>The effect exists on a second corpus.</strong> The main
+results are on the private WikiText-2 slice. The alternative public
+WikiText-2 corpus carries the same topology on seeds 51–53 (Table <a
+href="#tab:confirmatory" data-reference-type="ref"
+data-reference="tab:confirmatory">8</a>), and on two of the three the
+gradient alone breaks the gate as well
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.175</mn></mrow><annotation encoding="application/x-tex">+1.175</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.219</mn></mrow><annotation encoding="application/x-tex">+1.219</annotation></semantics></math>).
+One additional corpus is a limited robustness check: the effect is
+observed on both tested datasets, at different magnitudes, which does
+not establish that the effect is dataset-independent.</p>
+<p><strong>Packaged seed-42 rerun.</strong> The seed-42 result in
+Table <a href="#tab:sixseed" data-reference-type="ref"
+data-reference="tab:sixseed">7</a>
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.1923</mn></mrow><annotation encoding="application/x-tex">+1.1923</annotation></semantics></math>,
+originally served by a pre-existing container) was re-run from packaged
+code in a clean container in the primary configuration:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.147</mn></mrow><annotation encoding="application/x-tex">+1.147</annotation></semantics></math>
+(upper-95), paired effect
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.017</mn></mrow><annotation encoding="application/x-tex">+1.017</annotation></semantics></math>,
+support exact on 4,096/4,096, and the negative control at floor. The
+result is not confined to that container. Pooling the nine seeds that
+were run from packaged code (the six exploratory and the three
+replication runs), a seed-level random-effects estimate puts the
+frequent-token gradient-arm paired effect at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.92</mn></mrow><annotation encoding="application/x-tex">+0.92</annotation></semantics></math> pp,
+95% interval
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0.74</mn><mo>,</mo><mn>1.09</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0.74, 1.09]</annotation></semantics></math>
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>τ</mi><mo>=</mo><mn>0.23</mn></mrow><annotation encoding="application/x-tex">\tau = 0.23</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>I</mi><mn>2</mn></msup><mo>=</mo><mn>77</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">I^2 = 77\%</annotation></semantics></math>).
+The interval reaches the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.0</mn></mrow><annotation encoding="application/x-tex">+1.0</annotation></semantics></math> pp
+gate, so the pooled content effect is not separable from the gate
+threshold at this sample size. Three further units from an earlier,
+unpackaged tree are retained in the committed estimate for continuity
+with earlier reports; including them gives
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.88</mn></mrow><annotation encoding="application/x-tex">+0.88</annotation></semantics></math> pp,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0.75</mn><mo>,</mo><mn>1.02</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0.75, 1.02]</annotation></semantics></math>,
+but they are not re-derivable from the release and we do not rely on
+them.</p>
+<p>These runs are 2<span>,</span>000-step diagnostics on the 0.6B model,
+and the clean 40k-step rerun confirms the main configuration still fails
+its utility gate
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.896</mn></mrow><annotation encoding="application/x-tex">+0.896</annotation></semantics></math>,
+vs
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.9185</mn><annotation encoding="application/x-tex">0.9185</annotation></semantics></math>
+on the original cell). The claim that a configuration passes both gates
+attaches to the four-layer topology, not to the eleven-layer main
+configuration.</p>
+<h1 id="sec:shape">When does the structural signal convert to a token
+advantage? Depth, width, and budget</h1>
+<p>Nine audit cells vary budget, depth, and width (Figure <a
+href="#fig:shape" data-reference-type="ref"
+data-reference="fig:shape">4</a>; Table <a href="#tab:shape"
+data-reference-type="ref" data-reference="tab:shape">[tab:shape]</a>);
+each cell is a single run on seed 42, so every shape threshold below is
+a single-seed reading. Within this run the readings were insensitive to
+budget between 40k and 100k steps. Depth and width thresholds are read
+on the paired effect, and every cell’s shuffled-label negative control
+reads at floor.</p>
+<figure id="fig:shape" data-latex-placement="H">
+<embed src="figs/fig_w56_shape.png" />
+<figcaption>Attack-specific shape across audit cells. (a) depth ladder:
+the implemented emitter detected the effect at 12–11 delegated layers
+and not at 8–6. (b) the width sweep: the effect is detected at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>64</mn></mrow><annotation encoding="application/x-tex">D{=}64</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>96</mn></mrow><annotation encoding="application/x-tex">D{=}96</annotation></semantics></math>,
+and not at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>128</mn></mrow><annotation encoding="application/x-tex">D{=}128</annotation></semantics></math>.
+(c) The implemented probe’s paired effect did not increase between the
+two tested exposure budgets. Paired effect over the constant baseline
+with 95% CI on the gradient arm; one run per cell (seed
+42).</figcaption>
+</figure>
+<div class="tabular">
+<table>
+<caption>The nine-cell audit. Paired effect of the gradient arm over its constant baseline, with each cell&rsquo;s shuffled-label negative control beside it; frame-exact counts from the zero-support partition check. All nine committed cells, one run each (seed 42). The partition mechanism (zero-support match) is exact on every cell, whether or not the token effect is detected.</caption>
+<thead><tr><th>axis</th><th>steps</th><th>gradient arm (pp)</th><th>negative control (pp)</th><th>verdict</th><th>frames</th></tr></thead>
+<tbody>
+<tr><td>depth (12 del.)</td><td>2k</td><td>+0.4796</td><td>&minus;0.0702</td><td><strong>detected</strong></td><td>512/512</td></tr>
+<tr><td>depth (11 del., D=64)</td><td>40k</td><td>+0.9302</td><td>&minus;0.0112</td><td><strong>detected</strong></td><td>4,096/4,096</td></tr>
+<tr><td>budget</td><td>100k</td><td>+0.9066</td><td>&minus;0.0926</td><td><strong>detected</strong></td><td>4,096/4,096</td></tr>
+<tr><td>width (D=96)</td><td>10k</td><td>+0.8635</td><td>&minus;0.0061</td><td><strong>detected</strong></td><td>4,096/4,096</td></tr>
+<tr><td>depth (8 del.)</td><td>2k</td><td>&minus;0.4314</td><td>+0.0399</td><td>at floor</td><td>512/512</td></tr>
+<tr><td>depth (6 del.)</td><td>2k</td><td>&minus;0.2131</td><td>+0.0270</td><td>at floor</td><td>512/512</td></tr>
+<tr><td>width (D=128)</td><td>10k</td><td>&minus;0.4823</td><td>&minus;0.0153</td><td>at floor</td><td>4,096/4,096</td></tr>
+<tr><td>width (D=96)</td><td>10k</td><td>&minus;0.0861</td><td>+0.0824</td><td>at floor</td><td>512/512</td></tr>
+<tr><td>width (D=128)</td><td>10k</td><td>&minus;0.1190</td><td>+0.0702</td><td>at floor</td><td>512/512</td></tr>
+<tr><td colspan="6"><small>(the 512-frame D=96/128 readings are superseded by the 4,096-frame re-runs)</small></td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="structural-not-statistical.">Structural, not statistical.</h4>
+<p>The split is disclosed on every frame because every decoy gradient is
+exactly zero; the disclosure is deterministic, not a sampling
+artefact.</p>
+<h4 id="exposure-budget.">Exposure budget.</h4>
+<p>The implemented probe’s paired effect did not increase between the
+two tested exposure budgets. From 40k to 100k gradient exposure
+(2.5<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math>),
+the per-row effect changes from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.9302</mn></mrow><annotation encoding="application/x-tex">+0.9302</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.9066</mn></mrow><annotation encoding="application/x-tex">+0.9066</annotation></semantics></math>
+in this run.</p>
+<h4 id="attack-specific-depth-and-width-dependence.">Attack-specific
+depth and width dependence.</h4>
+<p>The recovered token advantage is detectable at 12 and 11 delegated
+layers and undetectable at 8 and 6: the gate is bracketed between 8 and
+12 on the matched 2k-step ladder, and the 11-layer point is the 40k-step
+main configuration, where depth is confounded with budget; the ladder’s
+point estimates are not a monotone dose–response. The paired effect is
+detected at latent width
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>64</mn></mrow><annotation encoding="application/x-tex">D{=}64</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>96</mn></mrow><annotation encoding="application/x-tex">D{=}96</annotation></semantics></math>,
+and not at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>128</mn></mrow><annotation encoding="application/x-tex">D{=}128</annotation></semantics></math>.
+The partition classification itself is exact at every depth and width
+(Table <a href="#tab:shape" data-reference-type="ref"
+data-reference="tab:shape">[tab:shape]</a>): depth and width affect
+conversion of the partition into a token advantage for this
+configuration and attack, not the underlying zero-support signal.
+Stronger inversion attacks can recover prompts from deep LLM
+states <span class="citation" data-cites="dong2025depth"></span>, so
+this local transition is not evidence that depth generally provides
+privacy. Table <a href="#tab:attacker_ledger" data-reference-type="ref"
+data-reference="tab:attacker_ledger">9</a> collects every attack family
+tried against the system, where each applies in the training cycle, and
+its outcome.</p>
+<div id="tab:attacker_ledger">
+<table style="width:93%;">
+<caption>The attacker ledger: every attack family tried against the
+system, where it applies in the cycle of Figure <a href="#fig:anatomy"
+data-reference-type="ref" data-reference="fig:anatomy">2</a>, and its
+outcome. Every committed attack family is listed; the supporting
+artefacts are indexed in Appendix <a href="#app:artifacts"
+data-reference-type="ref" data-reference="app:artifacts">10</a>. The two
+leak rows are the finding; the closed row is the fix.</caption>
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 8%" />
+<col style="width: 44%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">attack</th>
+<th style="text-align: left;">step (Fig. <a href="#fig:anatomy"
+data-reference-type="ref" data-reference="fig:anatomy">2</a>)</th>
+<th style="text-align: left;">outcome</th>
+<th style="text-align: left;">does it work?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">pre-set 9-arm battery on forward
+frames</td>
+<td style="text-align: left;">6</td>
+<td style="text-align: left;">defended floor
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.3</mn><mi>.</mi><mi>.</mi><mo>+</mo><mn>0.9</mn></mrow><annotation encoding="application/x-tex">+0.3..+0.9</annotation></semantics></math> pp;
+naked
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>9.5</mn><mi>.</mi><mi>.</mi><mo>+</mo><mn>10.7</mn></mrow><annotation encoding="application/x-tex">+9.5..+10.7</annotation></semantics></math> pp</td>
+<td style="text-align: left;">no, against the defence</td>
+</tr>
+<tr>
+<td style="text-align: left;">deep-inversion transformer probe</td>
+<td style="text-align: left;">6</td>
+<td style="text-align: left;">naked split-14
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>24.19</mn></mrow><annotation encoding="application/x-tex">+24.19</annotation></semantics></math> pp;
+defended floor at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>64</mn></mrow><annotation encoding="application/x-tex">D{=}64</annotation></semantics></math>
+<em>and</em>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>1024</mn></mrow><annotation encoding="application/x-tex">D{=}1024</annotation></semantics></math></td>
+<td style="text-align: left;">no, against the defence</td>
+</tr>
+<tr>
+<td style="text-align: left;">zero-support read (no training; just
+zeros)</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">partition exact on <em>every</em> frame,
+every seed</td>
+<td style="text-align: left;"><strong>yes</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">gradient arm alone</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">floor on the private corpus
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.50</mn></mrow><annotation encoding="application/x-tex">+0.50</annotation></semantics></math>);
+breaks on 2 of 3 public-corpus seeds
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.18</mn><mi>/</mi><mo>+</mo><mn>1.22</mn></mrow><annotation encoding="application/x-tex">+1.18/+1.22</annotation></semantics></math>)</td>
+<td style="text-align: left;">only on one dataset</td>
+</tr>
+<tr>
+<td style="text-align: left;">joint arm (frame
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo stretchy="false" form="postfix">‖</mo><annotation encoding="application/x-tex">\Vert</annotation></semantics></math>
+gradient)</td>
+<td
+style="text-align: left;">6<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>+</mi><annotation encoding="application/x-tex">+</annotation></semantics></math>10</td>
+<td style="text-align: left;">breaks the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.0</mn></mrow><annotation encoding="application/x-tex">+1.0</annotation></semantics></math> pp
+gate set in advance on <strong>6 of 6</strong> defended cells
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.44</mn><mi>.</mi><mi>.</mi><mo>+</mo><mn>2.18</mn></mrow><annotation encoding="application/x-tex">+1.44..+2.18</annotation></semantics></math>)</td>
+<td style="text-align: left;"><strong>yes</strong></td>
+</tr>
+<tr>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><msup><mi>G</mi><mi>T</mi></msup></mrow><annotation encoding="application/x-tex">XG^{T}</annotation></semantics></math>
+cross-Gram invariant</td>
+<td
+style="text-align: left;">6<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>+</mi><annotation encoding="application/x-tex">+</annotation></semantics></math>10</td>
+<td style="text-align: left;">floor on every capture (cosine and raw
+forms)</td>
+<td style="text-align: left;">no; the feature carries nothing</td>
+</tr>
+<tr>
+<td style="text-align: left;">vector-matching and nearest-signature
+attacks</td>
+<td style="text-align: left;">6</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.02</mn><annotation encoding="application/x-tex">0.02</annotation></semantics></math>–<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.03</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">0.03\%</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1.5</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">1.5\%</annotation></semantics></math>
+against a
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≈</mo><mn>5.9</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">\approx 5.9\%</annotation></semantics></math>
+constant baseline, i.e. below the no-attack control</td>
+<td style="text-align: left;">no</td>
+</tr>
+<tr>
+<td style="text-align: left;">compromise battery (wire capture, decoy
+identities, gauge compromise, known plaintext)</td>
+<td style="text-align: left;">6</td>
+<td style="text-align: left;">flat at/below control on every
+fraction</td>
+<td style="text-align: left;">no</td>
+</tr>
+<tr>
+<td style="text-align: left;">after the mitigation (per-row clip
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.01</mn><annotation encoding="application/x-tex">0.01</annotation></semantics></math>
+and Gaussian noise)</td>
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">all arms at floor
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.48</mn></mrow><annotation encoding="application/x-tex">+0.48</annotation></semantics></math>);
+support
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mi>/</mi><mn>1</mn><mo>,</mo><mn>024</mn></mrow><annotation encoding="application/x-tex">0/1{,}024</annotation></semantics></math>;
+utility cost
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.01</mn></mrow><annotation encoding="application/x-tex">+0.01</annotation></semantics></math> nats</td>
+<td style="text-align: left;"><strong>no longer</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+<h1 id="sec:related">External audits and related work</h1>
+<h2 id="a-selected-audit-of-split-llm-evaluations">A selected audit of
+split-LLM evaluations</h2>
+<p>The audit selected three recent evaluations to span a bidirectional
+attack, a bidirectional defence, and recent attack-plus-defence work; it
+is a purposeful sample, not a field survey (Table <a
+href="#tab:external" data-reference-type="ref"
+data-reference="tab:external">10</a>). None of the three combined all
+three controls.</p>
+<div id="tab:external">
+<table>
+<caption>Selected audit verdicts. The three works report attack or
+defence performance against reconstruction baselines. “Prompts to
+Responses” includes an unmatched random-token baseline in its
+appendix.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">system</th>
+<th style="text-align: left;">role</th>
+<th style="text-align: left;">injected calibration</th>
+<th style="text-align: left;">shuffled-label negative control</th>
+<th style="text-align: left;">predeclared gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">BiSR <span class="citation"
+data-cites="bisr"></span></td>
+<td style="text-align: left;">attack</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: left;">none</td>
+</tr>
+<tr>
+<td style="text-align: left;">DualGuard <span class="citation"
+data-cites="dualguard"></span></td>
+<td style="text-align: left;">defence</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: left;">none</td>
+</tr>
+<tr>
+<td style="text-align: left;">Prompts to Responses <span
+class="citation" data-cites="promptstoresponses"></span></td>
+<td style="text-align: left;">attack + defence</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: left;">no (unmatched baseline)</td>
+<td style="text-align: left;">none</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>BiSR <span class="citation" data-cites="bisr"></span> demonstrates
+backward-channel reconstruction against perturbation defences through
+comparisons with re-adapted attacks, but does not define an acceptance
+gate or shuffled-label negative control. DualGuard <span
+class="citation" data-cites="dualguard"></span> correctly evaluates
+forward, backward, and bidirectional attack paths before reporting a
+worst-case aggregate; its defence comparisons nevertheless do not
+include an injected detector canary, shuffled-label negative control, or
+predeclared privacy gate. Thus they do not support the specific
+calibrated no-leak decision required here; this is a statement about
+evaluation semantics, not defence efficacy. From Prompts to
+Responses <span class="citation" data-cites="promptstoresponses"></span>
+is forward-only by scope and reports an unmatched random-token baseline
+in its appendix.</p>
+<h2
+id="position-within-the-differential-privacy-auditing-lineage">Position
+within the differential-privacy auditing lineage</h2>
+<p>Planted-secret exposure tests <span class="citation"
+data-cites="carlini2019secret"></span> and attack-based DP audits <span
+class="citation"
+data-cites="jagielski2020auditing nasr2023tight steinke2023onerun"></span>
+establish controlled canaries and statistically valid empirical privacy
+tests. Randomized multi-canary audits already include explicit null
+hypotheses and decision rules <span class="citation"
+data-cites="pillutla2023randomization"></span>; calibrated membership
+attacks likewise emphasise reference distributions and declared
+operating points  <span class="citation"
+data-cites="carlini2022lira"></span>. We adapt them to channel-level
+split-protocol evaluation and add a coverage–amplitude dose ladder that
+estimates each metric’s onset before the gate is applied.</p>
+<h2
+id="split-learning-attacks-benchmarks-and-adjacent-systems">Split-learning
+attacks, benchmarks, and adjacent systems</h2>
+<p>The broader lineage already covers honest-but-curious reconstruction
+ <span class="citation" data-cites="erdogan2022unsplit"></span>,
+gradient-side label leakage  <span class="citation"
+data-cites="li2022labelleakage"></span>, malicious backward-signal
+control  <span class="citation" data-cites="pasquini2021tiger"></span>,
+and leakage from intermediate training states  <span class="citation"
+data-cites="gao2023pcat"></span>. SIMBA <span class="citation"
+data-cites="singh2024simba"></span> and VFLAIR-LLM  <span
+class="citation" data-cites="vflairllm"></span> provide modular
+evaluation substrates; VFLAIR-LLM reports 5 attacks
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+9 defences. Multi-attack split evaluation and bidirectional threat
+models are therefore well established. The narrower contribution here is
+the measured positive-control onset, channel-specific shuffled-label
+negative control, gate set in advance, and artefact-level traceability
+in one audited system. Table <a href="#tab:positioning"
+data-reference-type="ref" data-reference="tab:positioning">11</a> places
+this report against those systems on the axes that separate them.</p>
+<p>Within our selected 13-paper audit corpus, five works are in-scope
+split-LLM evaluations and eight are adjacent systems (trusted execution
+environment partitioning, inference-time obfuscation, on-device
+key-value cache protection, prompt sanitisation, and incentive design).
+MIXGUARD <span class="citation" data-cites="mixguard"></span> tunes
+adaptive gradient perturbation against a public proxy and reports
+defence-vs-attack comparisons, rather than detector calibration against
+a shuffled-label negative control. Forward-only inference frameworks
+(e.g., <span class="citation"
+data-cites="luoprompt aloepri gelo"></span>) do not include the
+training-gradient channel measured here.</p>
+<div id="tab:positioning">
+<table style="width:91%;">
+<caption>Positioning against the closest systems. “Empirical” =
+attacker-measured privacy; our excess is over a matched no-attack
+control with a confidence bound and a pre-declared gate, and the
+thresholds set in advance are calibrated by injected leaks (Section <a
+href="#sec:calibration" data-reference-type="ref"
+data-reference="sec:calibration">4</a>). Literature rows report those
+systems’ own published numbers; their evidence columns use their own
+authors’ metrics, the uncalibrated, no-matched-null pattern of
+Section <a href="#sec:related" data-reference-type="ref"
+data-reference="sec:related">7</a>, so read the comparison as evaluation
+<em>method</em>, not as relative leak size.</caption>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 16%" />
+<col style="width: 13%" />
+<col style="width: 24%" />
+<col style="width: 12%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">System</th>
+<th style="text-align: left;">Threat model</th>
+<th style="text-align: left;">Covers training?</th>
+<th style="text-align: left;">Privacy evidence</th>
+<th style="text-align: left;">Integrity</th>
+<th style="text-align: left;">Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>This work</strong></td>
+<td style="text-align: left;">compromised cloud; 9 declared channels: 3
+measured, 1 constructible, 5 declared unmeasured</td>
+<td style="text-align: left;">yes: 2k-step cells, 6 fresh seeds, 2
+datasets; 40k leak cells</td>
+<td style="text-align: left;">forward probe at floor on defended cells
+(conditional: gate fires
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>≥</mo><annotation encoding="application/x-tex">\ge</annotation></semantics></math>6%
+coverage); joint view breaks the gate on 6/6 cells
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.44</mn><mi>.</mi><mn>.2</mn><mn>.18</mn></mrow><annotation encoding="application/x-tex">+1.44..2.18</annotation></semantics></math> pp)
+until clipping and noise close it (3/3 at floor)</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">K{=}3</annotation></semantics></math>
+median 100%/0% (one perturbation class)</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1.05</mn><mi>.</mi><mn>.2</mn><mn>.5</mn><mo>×</mo></mrow><annotation encoding="application/x-tex">1.05..2.5\times</annotation></semantics></math>
+WAN</td>
+</tr>
+<tr>
+<td style="text-align: left;">AloePri <span class="citation"
+data-cites="aloepri"></span></td>
+<td style="text-align: left;">honest-but-curious</td>
+<td style="text-align: left;">no (inference)</td>
+<td style="text-align: left;">point TTRSRs; VMA 13.5–25% on two
+models</td>
+<td style="text-align: left;">none</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>≈</mo><annotation encoding="application/x-tex">\approx</annotation></semantics></math>0%
+online; 482 min offline at 671B</td>
+</tr>
+<tr>
+<td style="text-align: left;">GELO <span class="citation"
+data-cites="gelo"></span></td>
+<td style="text-align: left;">VRAM-read
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>+</mi><annotation encoding="application/x-tex">+</annotation></semantics></math>
+TEE island</td>
+<td style="text-align: left;">no</td>
+<td style="text-align: left;">p95 cosine/Gram error, no control</td>
+<td style="text-align: left;">scoped out</td>
+<td style="text-align: left;">20–30% microbenchmark</td>
+</tr>
+<tr>
+<td style="text-align: left;">PermLLM <span class="citation"
+data-cites="permllm"></span></td>
+<td style="text-align: left;">permutation obfuscation</td>
+<td style="text-align: left;">no</td>
+<td style="text-align: left;">broken by the matching family
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">&gt;</annotation></semantics></math>99%
+reconstruction)</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: left;">3 s/token (6B)</td>
+</tr>
+<tr>
+<td style="text-align: left;">ObfNet <span class="citation"
+data-cites="obfnet"></span></td>
+<td style="text-align: left;">backend holds obfuscators</td>
+<td style="text-align: left;">no</td>
+<td style="text-align: left;">perceptual (10 volunteers)</td>
+<td style="text-align: left;">none</td>
+<td style="text-align: left;">0.22–11 ms/sample edge</td>
+</tr>
+<tr>
+<td style="text-align: left;">TEE <span class="citation"
+data-cites="phalatee"></span></td>
+<td style="text-align: left;">trust silicon vendor</td>
+<td style="text-align: left;">partial</td>
+<td style="text-align: left;">hardware-rooted attestation</td>
+<td style="text-align: left;">hardware-rooted</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>&lt;</mo><annotation encoding="application/x-tex">&lt;</annotation></semantics></math>7–20%</td>
+</tr>
+<tr>
+<td style="text-align: left;">MPC/HE <span class="citation"
+data-cites="sigma bumblebee nexus puma"></span></td>
+<td style="text-align: left;">semi-honest parties</td>
+<td style="text-align: left;">no</td>
+<td style="text-align: left;">cryptographic by assumption</td>
+<td style="text-align: left;">by construction</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mn>2</mn></msup><annotation encoding="application/x-tex">10^{2}</annotation></semantics></math>–<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>10</mn><mn>4</mn></msup><mo>×</mo></mrow><annotation encoding="application/x-tex">10^{4}\times</annotation></semantics></math></td>
+</tr>
+<tr>
+<td style="text-align: left;">TOPLOC <span class="citation"
+data-cites="toploc"></span></td>
+<td style="text-align: left;">untrusted provider</td>
+<td style="text-align: left;">no</td>
+<td style="text-align: left;">n/a (integrity only)</td>
+<td style="text-align: left;">hash commits, 100%/0%</td>
+<td style="text-align: left;">258 B / 32 tokens</td>
+</tr>
+<tr>
+<td style="text-align: left;">VFLAIR-LLM <span class="citation"
+data-cites="vflairllm"></span></td>
+<td style="text-align: left;">evaluation harness (5 attacks
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+9 defences)</td>
+<td style="text-align: left;">substrate</td>
+<td style="text-align: left;">shared substrate; its evaluations lack the
+calibrated null</td>
+<td style="text-align: left;">n/a</td>
+<td style="text-align: left;">harness</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h1 id="sec:scope">Scope and limitations</h1>
+<p>The findings concern one split-training implementation. The main
+configuration, calibration, and shape analyses (Section <a
+href="#sec:shape" data-reference-type="ref"
+data-reference="sec:shape">6</a>) use WikiText-2; a second corpus is a
+three-seed diagnostic robustness check, not evidence of corpus
+independence. The external evaluation claim is limited to the targeted
+comparison of three recent works in Table <a href="#tab:external"
+data-reference-type="ref" data-reference="tab:external">10</a>.</p>
+<p>Five adversarial families are declared <strong>unmeasured</strong>,
+not covered: membership/property AUC (needs randomised membership
+assignment), response-side recovery (no response-side capture), timing
+metadata (no applicable metric), stateful remote state, and accumulated
+history. Active perturbation has an applicable calibrated metric but is
+not executed at the scale of the mitigation runs. The utility side
+likewise fails on the main configuration
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Δ</mi><annotation encoding="application/x-tex">\Delta</annotation></semantics></math>
+loss
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.9185</mn><annotation encoding="application/x-tex">0.9185</annotation></semantics></math>
+on the original cell,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.896</mn><annotation encoding="application/x-tex">0.896</annotation></semantics></math>
+on the clean rerun, both vs the 0.35 gate). The mitigation runs of
+Section <a href="#sec:confirmatory" data-reference-type="ref"
+data-reference="sec:confirmatory">5.3</a> answer that directly: the gate
+breaks on six of six cells that pass <em>both</em> gates. Those cells
+are 2<span>,</span>000-step diagnostic runs on the 0.6B model, and
+convergence-scale evidence remains out of scope. Rare-token recovery is
+exactly zero on the gradient arm under the implemented emitters (the
+wire arm shows isolated single-row recoveries, 0.015–0.030%). TAG-,
+LAMP-, FILM-, or DAGER-style sequence reconstruction has not been
+adapted to this object, a gradient cut at the split boundary rather than
+a full parameter gradient <span class="citation"
+data-cites="deng2021tag balunovic2022lamp gupta2022film petrov2024dager"></span>.
+We therefore establish frequent-token discrimination plus exact
+classification of the constructed partition, not reconstruction of
+held-out text.</p>
+<p>Additional negative results illustrate the difficulty of the problem.
+Rotation alone leaked 18–66% of tokens across three early rotation-only
+variants; noise strong enough to mask the signal destroyed utility
+first; longer frames leaked more
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.25</mn></mrow><annotation encoding="application/x-tex">+1.25</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.36</mn></mrow><annotation encoding="application/x-tex">+1.36</annotation></semantics></math> pp);
+and a short private phase after public pretraining still leaked
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.49</mn></mrow><annotation encoding="application/x-tex">+1.49</annotation></semantics></math> pp).
+A Mutual Information Neural Estimator (MINE) reading near zero nats is
+not a privacy certificate: a finite-sample lower bound cannot
+upper-bound true mutual information. The same cell that read
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>1.3</mn><mo>×</mo><msup><mn>10</mn><mrow><mi>−</mi><mn>6</mn></mrow></msup></mrow><annotation encoding="application/x-tex">-1.3\times10^{-6}</annotation></semantics></math>
+nats held a detected
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.758</mn></mrow><annotation encoding="application/x-tex">+0.758</annotation></semantics></math> pp
+probe effect.</p>
+<p>Two bodies of earlier evidence sit outside the argument above and are
+recorded in the appendices rather than dropped. Appendix <a
+href="#app:stack" data-reference-type="ref"
+data-reference="app:stack">11</a> names each mechanism of the evaluated
+defence, its implementation site, and its status. Appendix <a
+href="#app:batteries" data-reference-type="ref"
+data-reference="app:batteries">12</a> reports the historical attack
+batteries against the defended <em>forward</em> cell; they precede the
+representation-matched positive control of Section <a
+href="#sec:positive_control" data-reference-type="ref"
+data-reference="sec:positive_control">4.2</a> and are superseded by it
+as evidence of probe sensitivity.</p>
+<p>Held-out cross-entropy is measured on blocks held out within one
+flattened corpus stream rather than on held-out documents (Table <a
+href="#tab:setup" data-reference-type="ref"
+data-reference="tab:setup">1</a>), so every held-out decision here (the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.35</mn><annotation encoding="application/x-tex">0.35</annotation></semantics></math>
+utility gate, the claim that the four-layer topology passes it, and the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≈</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">\approx 0.01</annotation></semantics></math> nat
+mitigation cost) is a block-held-out reading, and claims that depend on
+document independence are out of scope.</p>
+<p>On availability: the protocol, metric thresholds, and family map were
+fixed before the replication and mitigation runs, and those fixed
+versions are the ones in the artefact release. Committed summaries and
+code support the displayed calibration and shape results; raw
+cluster-side prediction tensors are not part of the release. A scorer
+reimplementation, written internally rather than by an independent
+group, matched all nine primary seed values to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≤</mo><msup><mn>10</mn><mrow><mi>−</mi><mn>6</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\le
+10^{-6}</annotation></semantics></math> pp; that scorer and its
+prediction tensors are uncommitted, so the check is recorded but not
+re-executable. The complete transcript is likewise host-only under the
+raw-data policy. Appendix <a href="#app:artifacts"
+data-reference-type="ref" data-reference="app:artifacts">10</a> gives
+the result-by-result artefact index, availability boundaries, recorded
+verification, and documented limitations.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>This systems-security case study shows a forward-only evaluation
+passing while an omitted backward channel revealed which rows were real
+and which were decoys. The zero-support construction is an
+implementation and system-design defect; the false pass illustrates the
+more general evaluation failure mode of omitting an observable channel
+from the gate. This exact structural metadata disclosure is distinct
+from the implemented probe’s modest frequent-token paired effect (claim
+boundaries are recorded in Section <a href="#sec:scope"
+data-reference-type="ref" data-reference="sec:scope">8</a>). On both
+datasets, all six defended, open-gradient mitigation runs passed the
+forward privacy and utility gates yet exceeded the privacy gate in the
+joint view. In the three mitigated runs, per-row gradient clipping plus
+Gaussian noise removed the zero-support partition signal and suppressed
+the implemented probes below the gate at a held-out cross-entropy cost
+of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≈</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">\approx 0.01</annotation></semantics></math> nats.</p>
+<p>Controlled injection, a predeclared per-metric gate, and
+shuffled-label negative-control falsification form the calibrated
+protocol used to evaluate this case. They are not evidence for a general
+methodology across independently designed systems. In a targeted
+comparison of three recent evaluations, none combined all three
+controls. The evidence shows that a passing verdict is meaningful only
+for the channels, attacks, and leak magnitudes against which its
+instrument has been tested.</p>
+<h1 id="app:artifacts">Artifact and verification index</h1>
+<p>All paths in this appendix are relative to the artefact release at <a
+href="https://github.com/setloop-io/Privacy-Failure-in-Split-LLM-Training-The-Returned-Gradient-Nullifies-the-Decoys"
+class="uri">https://github.com/setloop-io/Privacy-Failure-in-Split-LLM-Training-The-Returned-Gradient-Nullifies-the-Decoys</a>.
+The index is organised by claim level rather than by directory. A
+committed summary or manifest supports inspection of the displayed
+value; “re-derivable” means end-to-end execution from that release
+alone; availability boundaries are recorded per result below.</p>
+<h2 id="headline-results">Headline results</h2>
+<h3 id="structural-metadata-disclosure">Structural metadata
+disclosure</h3>
+<p>The exact real/decoy split is recorded for each seed under
+|paper-data/collected/diagnostic/e1_reproduction_w12/|. The primary
+per-seed bundle summary is named |e1_repro_w12_s44_bundles.json| for
+seed 44, with corresponding files for the other seeds. These committed
+derived records support the frame and row agreement values; the
+underlying cluster-side prediction tensors are not committed. The
+complete verified transcript covers 3 seeds, 30,000 optimiser steps, and
+180,636 events in the committed manifest. The hardened verifier and the
+forward, gradient, and joint-view consumers confirm that all 30,000
+training frames carry all four payload directions. Payload-level attacks
+on the accumulated history remain unexecuted, and the raw transcript is
+host-only. The committed transcript index is under
+|paper-data/collected/diagnostic/w34_complete/|.</p>
+<h3 id="frequent-token-content-inference">Frequent-token content
+inference</h3>
+<p>The exploratory per-seed paired summaries and shuffled-label negative
+controls are stored with the structural records above. The twelve-seed
+hierarchical estimate is at
+|paper-data/collected/diagnostic/e1_hierarchical/| and is generated by
+|bin/summarize_complete_view_matrix.py|. The representation-matched
+positive-control records are under
+|paper-data/collected/diagnostic/deep_probe/|; the distinct
+isolation-audit rerun is under
+|outputs/deep_probe_validation_2026-08-27/|.</p>
+<h4 id="seed-44-verification-trace.">Seed-44 verification trace.</h4>
+<p>The committed per-seed paired record is stored under</p>
+<p>|paper-data/collected/diagnostic/e1_reproduction_w12/|. The record is
+named |e1_repro_w12_s44_arm_grad_real_paired.json|. Read
+<code>best_eligible.paired_advantage_pp</code>: the value
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.6929</mn></mrow><annotation encoding="application/x-tex">+0.6929</annotation></semantics></math>
+reproduces Table <a href="#tab:sixseed" data-reference-type="ref"
+data-reference="tab:sixseed">7</a> row-wise. The paired statistic behind
+that field is computed by |bin/paired_advantage.py| against the constant
+baseline over frame-clustered evaluation rows. The adjacent
+negative-control record,
+|e1_repro_w12_s44_arm_grad_real_shuffled_paired.json|, must read at
+floor. This is the recorded verification trace for the reported
+value.</p>
+<h3 id="calibration-and-attack-specific-shape">Calibration and
+attack-specific shape</h3>
+<p>The declared-channel table uses |paper-data/family_metric_map.json|
+together with the mitigation-run results, and is regenerated with
+|bin/build_channel_table.py|. The dose–response source is
+|paper-data/collected/diagnostic/w24_metric_sweep/w24_dose_response.json|,
+the associated summaries are under
+|paper-data/collected/diagnostic/w24_metric_sweep/|, and the figure
+command is |papers/paper-1/figs/build_figures.py|. The threshold map is
+|paper-data/family_metric_map.json|. The nine-cell shape records
+comprise the |paper-data/collected/diagnostic/gradaudit/| cell JSONs.
+Their full summary is</p>
+<p>.</p>
+<p>They use the same |papers/paper-1/figs/build_figures.py| command.
+These calibration and shape rows are re-derivable from committed
+summaries and code.</p>
+<h2 id="confirmation">Confirmation</h2>
+<h3 id="the-replication-runs">The replication runs</h3>
+<p>Seeds 48–50 are retained under
+|paper-data/collected/diagnostic/e1_confirmation/|. Their committed
+paired summaries support the displayed values; raw prediction tensors
+remain cluster-side.</p>
+<h3 id="the-mitigation-runs">The mitigation runs</h3>
+<p>The mitigation-run cells, paired statistics, and SHA-256 manifest of
+the 7.4 GB bundle store are committed under
+|paper-data/collected/diagnostic/phasec_2026-08-27/|. Per-cell records
+are named |paired_summary.json|. The packaged driver and scorer
+redisplay the committed derived summaries; the raw bundle store remains
+on the cluster.</p>
+<h3 id="internal-scorer-availability">Internal scorer availability</h3>
+<p>The independent scorer check is recorded in the internal red-team
+review of the scorer reimplementation
+(|docs/audits/W54_RED_TEAM_2026-08-26.md|). It re-derived all nine
+primary seed values to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≤</mo><msup><mn>10</mn><mrow><mi>−</mi><mn>6</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\le 10^{-6}</annotation></semantics></math> pp.
+The report is committed, but the independent scorer and its recorded
+prediction tensors are not, so this verification is recorded but not
+repository-re-executable.</p>
+<p>Table <a href="#tab:availability" data-reference-type="ref"
+data-reference="tab:availability">12</a> consolidates the availability
+boundary for these result categories.</p>
+<div id="tab:availability">
+<table>
+<caption>Per-result availability. The audit-cell and calibration rows
+regenerate from committed summaries; the exploratory and mitigation rows
+are redisplayed from committed derived artefacts whose raw prediction
+tensors remain on the cluster. Transcript hashes and the manifest are
+committed, but the payload remains on its host.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">result category</th>
+<th style="text-align: left;">committed input</th>
+<th style="text-align: left;">committed code</th>
+<th style="text-align: left;">re-derivable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">exploratory gradient result</td>
+<td style="text-align: left;">per-seed paired JSONs and negative
+controls; bundles are manifests to cluster-side prediction tensors</td>
+<td style="text-align: left;">packaged scorer</td>
+<td style="text-align: left;">displayed values from committed
+summaries</td>
+</tr>
+<tr>
+<td style="text-align: left;">nine audit cells</td>
+<td
+style="text-align: left;">|paper-data/collected/diagnostic/gradaudit/|
+cell JSONs and summary</td>
+<td
+style="text-align: left;">|papers/paper-1/figs/build_figures.py|</td>
+<td style="text-align: left;">yes</td>
+</tr>
+<tr>
+<td style="text-align: left;">dose–response calibration</td>
+<td
+style="text-align: left;">|paper-data/collected/diagnostic/w24_metric_sweep/|
+JSONs</td>
+<td
+style="text-align: left;">|papers/paper-1/figs/build_figures.py|</td>
+<td style="text-align: left;">yes</td>
+</tr>
+<tr>
+<td style="text-align: left;">mitigation runs</td>
+<td style="text-align: left;"><code>phasec_2026-08-27/</code> manifests
+and paired summaries</td>
+<td style="text-align: left;">packaged driver and scorer</td>
+<td style="text-align: left;">displayed values from committed
+summaries</td>
+</tr>
+<tr>
+<td style="text-align: left;">internal scorer check</td>
+<td style="text-align: left;">internal-check report</td>
+<td style="text-align: left;">uncommitted independent scorer</td>
+<td style="text-align: left;">recorded verification only</td>
+</tr>
+<tr>
+<td style="text-align: left;">complete transcript</td>
+<td style="text-align: left;">hashes and manifest</td>
+<td style="text-align: left;">verifier</td>
+<td style="text-align: left;">no; host-only by policy</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="corrections-and-limitations">Corrections and limitations</h2>
+<h3
+id="sequential-block-split-versus-the-document-protocol">Sequential-block
+split versus the document protocol</h3>
+<p>The |paper-data/evaluation_protocol.json| file, fixed in advance,
+declares a document-level held-out split, but the committed runner
+implements the sequential fixed-width block split reported in Table <a
+href="#tab:setup" data-reference-type="ref"
+data-reference="tab:setup">1</a>. Held-out measurements are therefore
+block-held-out within one flattened corpus stream, not
+document-held-out; claims that depend on document independence remain
+out of scope. This records the discrepancy; the protocol file itself was
+left unedited.</p>
+<h3 id="corrections-of-record">Corrections of record</h3>
+<p>The traceability verification is recorded at the traceability audit,
+which fixes the committed-versus-cluster-side evidence boundary
+(|docs/audits/W78_TRACEABILITY_2026-08-26.md|). It supersedes earlier
+wording about what is committed versus cluster-side. The adversarial
+review round, an external adversarial re-read of the manuscript’s
+evidence claims, at |docs/audits/W78_CODEX_REVIEW_2026-08-27.md| applies
+it, and the same red-team report records the independent re-derivation.
+The traceability audit has precedence for evidence boundaries.</p>
+<p>A forward-membership reading of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.068</mn></mrow><annotation encoding="application/x-tex">+0.068</annotation></semantics></math>
+(AUC above the 0.5 floor, stable across all six packaged seeds) was
+falsified by the shuffled-label negative control: it survives label
+permutation and randomised membership assignment, decomposes into
+in-sample memorisation
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.095</mn></mrow><annotation encoding="application/x-tex">+0.095</annotation></semantics></math>)
+with a corpus-region term of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≈</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\approx 0</annotation></semantics></math>,
+and exists only in the coordinate probe that cannot generalise. The
+purported members were the probe’s own training rows. We withdrew the
+channel; and <code>membership_auc</code> remains a diagnostic. The
+underlying capture remains on the cluster.</p>
+<p>Claims withdrawn during the study are recorded in
+|paper-data/claim_evidence_ledger.json| with their refutation records;
+the appendices that follow retain withdrawn entries only to identify
+their status and provenance.</p>
+<h1 id="app:stack">The defended stack, mechanism by mechanism</h1>
+<p>Table <a href="#tab:stack" data-reference-type="ref"
+data-reference="tab:stack">13</a> names each mechanism of the evaluated
+defence concretely, with its implementation site and its status in the
+current evidence. Three rows carry a non-core status, each for a
+recorded reason: the fragmentation cell’s remote modules never received
+a gradient (a dispatch defect; the cell is invalidated as a
+trained-fragmentation experiment), the public-pretraining and capacity
+framing are withdrawn per the refutation record, and the deep defended
+cloud’s capacity conclusion is withdrawn with it.</p>
+<div id="tab:stack">
+<table style="width:93%;">
+<caption>Techniques at a glance: what each mechanism <em>is</em>,
+concretely, where it lives, and its status (core / available / optional
+/ withdrawn / invalidated) in the current evidence.</caption>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 24%" />
+<col style="width: 48%" />
+<col style="width: 9%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Purpose</th>
+<th style="text-align: left;">Technique</th>
+<th style="text-align: left;">Detail</th>
+<th style="text-align: left;">Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Compression</td>
+<td style="text-align: left;">adversarially trained MLP encoder/decoder
+(information bottleneck)</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>H</mi><mo>→</mo><mi>D</mi><mo>=</mo><mn>64</mn></mrow><annotation encoding="application/x-tex">H{\to}D{=}64</annotation></semantics></math>
+MLP with GELU, trained by minimax against embedded
+token/property/reconstruction probes plus a MINE MI penalty (the MI
+reading is not a certificate)</td>
+<td style="text-align: left;">core</td>
+</tr>
+<tr>
+<td style="text-align: left;">Noise</td>
+<td style="text-align: left;">per-token-row L2 clip to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mo>=</mo><mn>1.0</mn></mrow><annotation encoding="application/x-tex">C{=}1.0</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>+</mi><annotation encoding="application/x-tex">+</annotation></semantics></math>
+additive Gaussian
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>0.35</mn><mo>⋅</mo><mi>C</mi></mrow><annotation encoding="application/x-tex">\sigma{=}0.35{\cdot}C</annotation></semantics></math>
+(0.40 on hybrid MoE), both directions</td>
+<td style="text-align: left;">Gaussian mechanism with zCDP accounting
+(the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ε</mi><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math>
+is quoted as vacuous)</td>
+<td style="text-align: left;">core</td>
+</tr>
+<tr>
+<td style="text-align: left;">Key derivation</td>
+<td style="text-align: left;">SHA-256 counter-mode KDF</td>
+<td style="text-align: left;">128-bit CSPRNG master per draw,
+domain-separated
+<code>sha256(DOM</code><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo stretchy="false" form="postfix">∥</mo><annotation encoding="application/x-tex">\|</annotation></semantics></math><code>S</code><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo stretchy="false" form="postfix">∥</mo><annotation encoding="application/x-tex">\|</annotation></semantics></math><code>t)</code>,
+exact
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>u</mi><mn>64</mn><mo>≫</mo><mn>11</mn><mo stretchy="false" form="postfix">)</mo><mo>⋅</mo><msup><mn>2</mn><mrow><mi>−</mi><mn>53</mn></mrow></msup></mrow><annotation encoding="application/x-tex">(u64{\gg}11){\cdot}2^{-53}</annotation></semantics></math>
+uniforms, float64 Box-Muller</td>
+<td style="text-align: left;">core</td>
+</tr>
+<tr>
+<td style="text-align: left;">Rotation</td>
+<td style="text-align: left;">Haar-random orthogonal</td>
+<td style="text-align: left;">Gaussian matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>→</mo><annotation encoding="application/x-tex">\to</annotation></semantics></math>
+QR with positive-diagonal sign fix, at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>
+width; fresh per request</td>
+<td style="text-align: left;">core</td>
+</tr>
+<tr>
+<td style="text-align: left;">Permutation</td>
+<td style="text-align: left;">Fisher–Yates over the KDF stream</td>
+<td style="text-align: left;">without replacement; fresh per
+request</td>
+<td style="text-align: left;">core</td>
+</tr>
+<tr>
+<td style="text-align: left;">Scale gauge</td>
+<td style="text-align: left;">per-row
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">exp</mi><mo>&#8289;</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mi>σ</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo><mo>⋅</mo><mo stretchy="false" form="prefix">(</mo><mi>±</mi><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\exp(N(0,\sigma))\cdot(\pm1)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><mn>0.75</mn></mrow><annotation encoding="application/x-tex">\sigma{=}0.75</annotation></semantics></math>,
+clamped
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0.2</mn><mo>,</mo><mn>5</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0.2,5]</annotation></semantics></math></td>
+<td style="text-align: left;">independent of the other gauges (separate
+KDF epoch); OFF for radial/invariant-MLP clouds</td>
+<td style="text-align: left;">core</td>
+</tr>
+<tr>
+<td style="text-align: left;">Decoy rows</td>
+<td style="text-align: left;">recycled <em>real</em> latent rows from
+earlier train blocks</td>
+<td style="text-align: left;">CSPRNG-sampled without replacement, honest
+labels tracked; decoys are real data, not noise</td>
+<td style="text-align: left;">core</td>
+</tr>
+<tr>
+<td style="text-align: left;">Transport</td>
+<td style="text-align: left;">websockets over TLS 1.3</td>
+<td style="text-align: left;">pinned self-signed CA (trusts no system
+store), hostname verification on, plaintext refused</td>
+<td style="text-align: left;">core</td>
+</tr>
+<tr>
+<td style="text-align: left;">Session isolation</td>
+<td style="text-align: left;">fresh cloud model + AdamW per
+connection</td>
+<td style="text-align: left;">seeded per session under
+<code>fork_rng</code>; no cross-session state</td>
+<td style="text-align: left;">core</td>
+</tr>
+<tr>
+<td style="text-align: left;">Gradient hardening</td>
+<td style="text-align: left;">per-token L2 clip 1.0, non-finite
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>⇒</mo><annotation encoding="application/x-tex">\Rightarrow</annotation></semantics></math>
+abort</td>
+<td style="text-align: left;">on remote-returned gradients</td>
+<td style="text-align: left;">core</td>
+</tr>
+<tr>
+<td style="text-align: left;">Integrity</td>
+<td style="text-align: left;">identical-seed replicas
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>+</mi><annotation encoding="application/x-tex">+</annotation></semantics></math>
+median compare</td>
+<td style="text-align: left;">relative deviation from group mean
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>&gt;</mo><annotation encoding="application/x-tex">&gt;</annotation></semantics></math>
+0.02
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>⇒</mo><annotation encoding="application/x-tex">\Rightarrow</annotation></semantics></math>
+flagged; median neutralises one adversary; demonstrated on one large
+perturbation class only</td>
+<td style="text-align: left;">avail.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Cloud compute</td>
+<td style="text-align: left;">gauge-equivariant Gram message
+passing</td>
+<td style="text-align: left;">softmax over squared unit-Gram
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+Gram @ unit rows (monomial), expert routing, or invariant-feature MLP
+gates</td>
+<td style="text-align: left;">core</td>
+</tr>
+<tr>
+<td style="text-align: left;">Wire quantisation</td>
+<td style="text-align: left;">fixed-grid int8 over the gauge clamp
+range</td>
+<td style="text-align: left;">straight-through on the defender gradient
+path; absmax variant rejected (strips the scale gauge)</td>
+<td style="text-align: left;">avail.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Replay resistance</td>
+<td style="text-align: left;">per-request nonce acceptance window</td>
+<td style="text-align: left;">a replayed frame is refused</td>
+<td style="text-align: left;">core</td>
+</tr>
+<tr>
+<td style="text-align: left;">Key ratchet</td>
+<td style="text-align: left;">per-epoch key derivation on the KDF
+chain</td>
+<td style="text-align: left;">limits cross-request capture pooling; the
+current transform is necessarily visible to the executor; it bounds
+accumulation, it is not irreversibility</td>
+<td style="text-align: left;">core</td>
+</tr>
+<tr>
+<td style="text-align: left;">Redundant channels</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">K{=}2</annotation></semantics></math>
+independent cloud channels, fresh gauges per channel</td>
+<td style="text-align: left;">cross-check + independence</td>
+<td style="text-align: left;">core</td>
+</tr>
+<tr>
+<td style="text-align: left;">Two-segment delegation</td>
+<td style="text-align: left;">cloud segment A / private island / cloud
+segment B</td>
+<td style="text-align: left;">chained surrogate error compounds across
+segments, the measured reason it stays optional</td>
+<td style="text-align: left;">opt.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Public pretraining</td>
+<td style="text-align: left;">UCN trains on public data at full
+fidelity; private phase re-hardens</td>
+<td style="text-align: left;">the short-private-phase cell leaked
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.49</mn></mrow><annotation encoding="application/x-tex">+1.49</annotation></semantics></math> pp);
+privacy cost zero on the public stream</td>
+<td style="text-align: left;">opt.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Fragmentation</td>
+<td style="text-align: left;">frame split into two
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><mn>32</mn></mrow><annotation encoding="application/x-tex">D{=}32</annotation></semantics></math>
+half-views</td>
+<td style="text-align: left;">structural partition across servers; the
+measured cell’s remote modules never trained, invalidating it as a
+trained-fragmentation experiment</td>
+<td style="text-align: left;">invalid.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Gram flattening</td>
+<td style="text-align: left;">regularizer penalising off-diagonal Gram
+concentration</td>
+<td style="text-align: left;">keeps the invariant features
+uninformative</td>
+<td style="text-align: left;">avail.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Deep defended cloud (isolation cells)</td>
+<td style="text-align: left;">deep invariant-feature MLP: norms and
+Gram-statistic feature channel with deep wide gates</td>
+<td style="text-align: left;">118.9M params; its capacity conclusion is
+withdrawn</td>
+<td style="text-align: left;">withdr.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Complementary views</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">K{=}3</annotation></semantics></math>
+disjoint 64-wide views, one per cloud, per-view rotation, one shared row
+permutation</td>
+<td style="text-align: left;">privacy rests on k-of-K collusion; union
+attacker evaluated conservatively</td>
+<td style="text-align: left;">opt.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Secret mixup</td>
+<td style="text-align: left;">released rows
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mi>λ</mi><mi>z</mi><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo><msub><mi>z</mi><mtext mathvariant="normal">decoy</mtext></msub></mrow><annotation encoding="application/x-tex">= \lambda z + (1{-}\lambda) z_{\text{decoy}}</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><mn>0.75</mn></mrow><annotation encoding="application/x-tex">\lambda{=}0.75</annotation></semantics></math></td>
+<td style="text-align: left;">TLN corrects the return via a parallel
+decoy forward; approximate under the nonlinear cloud, cost measured</td>
+<td style="text-align: left;">opt.</td>
+</tr>
+<tr>
+<td style="text-align: left;">Adaptive controller</td>
+<td style="text-align: left;">fresh probe every 100 steps; tripwire
+actions + utility-gate width ladder</td>
+<td style="text-align: left;">one gross breach repaired within one
+window; its monitor was later shown blind at relevant operating
+points</td>
+<td style="text-align: left;">withdr.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>None of these are novel primitives in isolation. QR rotations,
+Fisher–Yates, Gaussian mechanisms, TLS are all standard. The engineering
+content is their composition order and their measured interaction: the
+bottleneck alone leaks, the gauges alone leak, noise alone destroys
+utility. The composite at these settings is what sits at the floor. That
+is why the table names not just the technique but the configuration it
+was validated at.</p>
+<h1 id="app:batteries">The defended cell under its historical attack
+batteries</h1>
+<p>The three batteries below attack the <em>defended forward</em> cell
+(the conditional claim), not the backward channel this report is about.
+Each uses one probe family on the forward view only, and the battery’s
+convention reads <em>trends</em> below a weak constant baseline. They
+are reported here with the representation-matched positive control
+(Section <a href="#sec:positive_control" data-reference-type="ref"
+data-reference="sec:positive_control">4.2</a>, Table <a
+href="#tab:positive_control" data-reference-type="ref"
+data-reference="tab:positive_control">5</a>) that the original batteries
+lacked.</p>
+<p>These batteries were run on two models: the Qwen3-0.6B of Table <a
+href="#tab:setup" data-reference-type="ref"
+data-reference="tab:setup">1</a>, and a 35B-A3B mixture-of-experts model
+used only here, as a capacity check on the defended forward cell. No
+result in the body of this report depends on the larger model. Table <a
+href="#tab:battery" data-reference-type="ref"
+data-reference="tab:battery">14</a> reports the compromise-fraction
+battery, Table <a href="#tab:matching" data-reference-type="ref"
+data-reference="tab:matching">15</a> the external matching-attack
+families, and Table <a href="#tab:byz" data-reference-type="ref"
+data-reference="tab:byz">16</a> the Byzantine median verification.</p>
+<div id="tab:battery">
+<table style="width:92%;">
+<caption>Compromise-fraction battery on the defended cell. Each row
+gives the attacker a growing share of some secret and asks whether the
+probe improves. Values are the probe’s accuracy in percentage points
+above or below its constant-guess baseline, so a negative number means
+the probe did worse than guessing. None of these arms approaches the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1.0</mn></mrow><annotation encoding="application/x-tex">+1.0</annotation></semantics></math> pp
+gate, and none improves as the attacker is given more.</caption>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 20%" />
+<col style="width: 15%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Arm (fraction grid)</th>
+<th style="text-align: left;">0.6B trend</th>
+<th style="text-align: left;">35B-A3B trend</th>
+<th style="text-align: left;">Reading</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Wire capture 10/25/50/100%</td>
+<td style="text-align: left;">flat,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>4.7</mn></mrow><annotation encoding="application/x-tex">-4.7</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>4.9</mn></mrow><annotation encoding="application/x-tex">-4.9</annotation></semantics></math></td>
+<td style="text-align: left;">flat,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>4.6</mn></mrow><annotation encoding="application/x-tex">-4.6</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>5.1</mn></mrow><annotation encoding="application/x-tex">-5.1</annotation></semantics></math></td>
+<td style="text-align: left;">capturing the whole wire does not
+help</td>
+</tr>
+<tr>
+<td style="text-align: left;">Decoy identities revealed 0/25/50/90%</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>4.9</mn></mrow><annotation encoding="application/x-tex">-4.9</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>7.4</mn></mrow><annotation encoding="application/x-tex">-7.4</annotation></semantics></math></td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>4.9</mn></mrow><annotation encoding="application/x-tex">-4.9</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>5.6</mn></mrow><annotation encoding="application/x-tex">-5.6</annotation></semantics></math></td>
+<td style="text-align: left;">knowing which rows are decoys makes the
+probe worse</td>
+</tr>
+<tr>
+<td style="text-align: left;">Gauge secrets leaked, 10–20%</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>7.8</mn></mrow><annotation encoding="application/x-tex">-7.8</annotation></semantics></math>
+ungauged /
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>4.7</mn></mrow><annotation encoding="application/x-tex">-4.7</annotation></semantics></math>
+gauged</td>
+<td
+style="text-align: left;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>5.7</mn></mrow><annotation encoding="application/x-tex">-5.7</annotation></semantics></math>
+/
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>4.6</mn></mrow><annotation encoding="application/x-tex">-4.6</annotation></semantics></math></td>
+<td style="text-align: left;">rows seen before gauging still read at
+guessing level</td>
+</tr>
+<tr>
+<td style="text-align: left;">Known plaintext 1/5/20%</td>
+<td style="text-align: left;">flat,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>3.8</mn></mrow><annotation encoding="application/x-tex">-3.8</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>4.4</mn></mrow><annotation encoding="application/x-tex">-4.4</annotation></semantics></math></td>
+<td style="text-align: left;">flat,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≈</mo><mi>−</mi><mn>4.0</mn></mrow><annotation encoding="application/x-tex">\approx-4.0</annotation></semantics></math></td>
+<td style="text-align: left;">knowing some tokens does not reveal the
+others</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="tab:matching">
+<table>
+<caption>External matching-attack families vs. the defended cell
+(regenerated bundles). Two adapted attack families on these captures.
+The positive-control sensitivity they presuppose is Table <a
+href="#tab:positive_control" data-reference-type="ref"
+data-reference="tab:positive_control">5</a>.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Model</th>
+<th style="text-align: right;">Gate statistic (pp)</th>
+<th style="text-align: right;">Vector-matching top-1, against
+baseline</th>
+<th style="text-align: right;">Nearest-signature top-1, against
+baseline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">0.6B (seed 42)</td>
+<td
+style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.541</mn></mrow><annotation encoding="application/x-tex">+0.541</annotation></semantics></math></td>
+<td
+style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.03</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">0.03\%</annotation></semantics></math>
+vs
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5.92</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">5.92\%</annotation></semantics></math></td>
+<td
+style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1.56</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">1.56\%</annotation></semantics></math>
+vs
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5.92</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">5.92\%</annotation></semantics></math></td>
+</tr>
+<tr>
+<td style="text-align: left;">35B-A3B (seed 42)</td>
+<td
+style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.285</mn></mrow><annotation encoding="application/x-tex">+0.285</annotation></semantics></math></td>
+<td
+style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.02</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">0.02\%</annotation></semantics></math>
+vs
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5.85</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">5.85\%</annotation></semantics></math></td>
+<td
+style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1.54</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">1.54\%</annotation></semantics></math>
+vs
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5.85</mn><mi>%</mi></mrow><annotation encoding="application/x-tex">5.85\%</annotation></semantics></math></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="tab:byz">
+<table>
+<caption><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">K{=}3</annotation></semantics></math>
+Byzantine median verification. One large perturbation class on identical
+CPU replicas; no general active-security claim.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">Cell</th>
+<th style="text-align: right;">Verified frames</th>
+<th style="text-align: right;">Flagged</th>
+<th style="text-align: right;">Max rel. dev.</th>
+<th style="text-align: right;">Loss
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Δ</mi><annotation encoding="application/x-tex">\Delta</annotation></semantics></math></th>
+<th style="text-align: right;">Ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">3 honest CPU nodes</td>
+<td style="text-align: right;">2<span>,</span>256</td>
+<td style="text-align: right;">0 (0% FP)</td>
+<td
+style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>4.98</mn><mo>×</mo><msup><mn>10</mn><mrow><mi>−</mi><mn>8</mn></mrow></msup></mrow><annotation encoding="application/x-tex">4.98{\times}10^{-8}</annotation></semantics></math></td>
+<td
+style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.071</mn></mrow><annotation encoding="application/x-tex">+0.071</annotation></semantics></math></td>
+<td
+style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>9.30</mn><mo>×</mo></mrow><annotation encoding="application/x-tex">9.30\times</annotation></semantics></math></td>
+</tr>
+<tr>
+<td style="text-align: left;">2 honest
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>+</mi><annotation encoding="application/x-tex">+</annotation></semantics></math>
+1 malicious (lying)</td>
+<td style="text-align: right;">2<span>,</span>256</td>
+<td style="text-align: right;">2<span>,</span>256 (100%)</td>
+<td
+style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.5947</mn><annotation encoding="application/x-tex">0.5947</annotation></semantics></math></td>
+<td
+style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>0.088</mn></mrow><annotation encoding="application/x-tex">+0.088</annotation></semantics></math></td>
+<td
+style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>9.13</mn><mo>×</mo></mrow><annotation encoding="application/x-tex">9.13\times</annotation></semantics></math></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="thebibliography">
+<p><span>10</span></p>
+<p>Mislav Balunovi<span>ć</span>, Dimitar I. Dimitrov, Nikola
+Jovanovi<span>ć</span>, and Martin Vechev. : Extracting text from
+gradients with language model priors. In <span><em>Advances in Neural
+Information Processing Systems (<span>NeurIPS</span>)</em></span>,
+volume 35, 2022.</p>
+<p>Anatoly Belikov and Ilya Fedotov. Good-enough <span>LLM</span>
+obfuscation, 2026.</p>
+<p>Nicholas Carlini, Steve Chien, Milad Nasr, Shuang Song, Andreas
+Terzis, and Florian Tram<span>è</span>r. Membership inference attacks
+from first principles. In <span><em>2022 <span>IEEE</span> Symposium on
+Security and Privacy</em></span>, pages 1897–1914, 2022.</p>
+<p>Nicholas Carlini, Chang Liu, <span>Ú</span>lfar Erlingsson, Jernej
+Kos, and Dawn Song. The secret sharer: Evaluating and testing unintended
+memorization in neural networks. In <span><em>28th <span>USENIX</span>
+Security Symposium (<span>USENIX</span> Security 19)</em></span>, pages
+267–284. <span>USENIX</span> Association, August 2019.</p>
+<p>Chen Chen, Xiang Gao, Xianshun Wang, Chengran Li, Shengyu Xia,
+Xueluan Gong, Linru Zhang, Qian Wang, and Kwok-Yan Lam. The art of
+mixology: Mixup-based obfuscation for privacy-preserving split learning
+in large language models, 2026.</p>
+<p>Guanzhong Chen, Zhenghan Qin, Mingxin Yang, Yajie Zhou, Tao Fan,
+Tianyu Du, and Zenglin Xu. Unveiling the vulnerability of private
+fine-tuning in split-based frameworks for large language models: A
+bidirectionally enhanced attack. In <span><em>Proceedings of the 2024
+<span>ACM</span> <span>SIGSAC</span> Conference on Computer and
+Communications Security</em></span>, pages 2904–2918. Association for
+Computing Machinery, 2024. arXiv:2409.00960.</p>
+<p>Jieren Deng, Yijue Wang, Ji Li, Chenghong Wang, Chao Shang, Hang Liu,
+Sanguthevar Rajasekaran, and Caiwen Ding. : Gradient attack on
+transformer-based language models. In <span><em>Findings of the
+Association for Computational Linguistics: <span>EMNLP</span>
+2021</em></span>, pages 3600–3610. Association for Computational
+Linguistics, November 2021.</p>
+<p>Tian Dong, Yan Meng, Shaofeng Li, Guoxing Chen, Zhen Liu, and Haojin
+Zhu. Depth gives a false sense of privacy: <span>LLM</span> internal
+states inversion. In <span><em>34th <span>USENIX</span> Security
+Symposium (<span>USENIX</span> Security 25)</em></span>, pages
+1629–1648. <span>USENIX</span> Association, August 2025.</p>
+<p>Ege Erdogan, Alptekin K<span>ü</span>p<span>ç</span><span>ü</span>,
+and A. Erc<span>ü</span>ment <span>Ç</span>i<span>ç</span>ek. :
+Data-oblivious model inversion, model stealing, and label inference
+attacks against split learning. In <span><em>Proceedings of the 2022
+Workshop on Privacy in the Electronic Society
+(<span>WPES</span>)</em></span>, pages 115–124, 2022.</p>
+<p>Xinben Gao and Lan Zhang. : Functionality and data stealing from
+split learning by pseudo-client attack. In <span><em>32nd
+<span>USENIX</span> Security Symposium (<span>USENIX</span> Security
+23)</em></span>, pages 5271–5288. <span>USENIX</span> Association,
+August 2023.</p>
+<p>Zixuan Gu, Qiufeng Fan, Long Sun, Yang Liu, and Xiaojun Ye. : A
+comprehensive framework and benchmark for split learning of
+<span>LLMs</span>. In <span><em>Proceedings of the 31st <span>ACM</span>
+<span>SIGKDD</span> Conference on Knowledge Discovery and Data Mining
+V.2</em></span>, pages 5470–5481. Association for Computing Machinery,
+2025. arXiv:2508.03097.</p>
+<p>Zixuan Gu, Xiaojun Ye, and Yang Liu. From prompts to responses:
+Dual-sided data leakage and defense in split large language models,
+2026.</p>
+<p>Kanav Gupta, Neha Jawalkar, Ananta Mukherjee, Nishanth Chandran,
+Divya Gupta, Ashish Panwar, and Rahul Sharma. : Secure <span>GPT</span>
+inference with function secret sharing. , 2024(4), 2024.</p>
+<p>Samyak Gupta, Yangsibo Huang, Zexuan Zhong, Tianyu Gao, Kai Li, and
+Danqi Chen. Recovering private text in federated learning of language
+models. In <span><em>Advances in Neural Information Processing Systems
+(<span>NeurIPS</span>)</em></span>, volume 35, 2022.</p>
+<p>Matthew Jagielski, Jonathan Ullman, and Alina Oprea. Auditing
+differentially private machine learning: How private is private
+<span>SGD</span>? In <span><em>Advances in Neural Information Processing
+Systems (<span>NeurIPS</span>)</em></span>, volume 33, 2020.</p>
+<p>Wen jie Lu et al. : Secure inference of
+<span>LLaMA</span>-7<span>B</span> in five minutes, 2023.</p>
+<p>Wen jie Lu et al. : Secure two-party inference framework for large
+transformers. In <span><em>NDSS</em></span>, 2025.</p>
+<p>Oscar Li, Jiankai Sun, Xin Yang, Weihao Gao, Hongyi Zhang, Junyuan
+Xie, Virginia Smith, and Chong Wang. Label leakage and protection in
+two-party split learning. In <span><em>International Conference on
+Learning Representations (<span>ICLR</span>)</em></span>, 2022.</p>
+<p>Yu Lin, Qizhi Zhang, Wenqiang Ruan, Daode Zhang, Jue Hong, Ye Wu,
+Hanning Xia, Yunlong Mao, and Sheng Zhong. Towards privacy-preserving
+<span>LLM</span> inference via covariant obfuscation, 2026. v2; v1 title
+used “Collaborative”.</p>
+<p>Zihan Liu, Yizhen Wang, Rui Wang, and Sai Wu. : A parameter space
+transformation approach for bidirectional defense in split-based
+<span>LLM</span> fine-tuning. In <span><em>Proceedings of the 63rd
+Annual Meeting of the Association for Computational Linguistics (Volume
+1: Long Papers)</em></span>, pages 17065–17080, Vienna, Austria, July
+2025. Association for Computational Linguistics.</p>
+<p>Xinjian Luo, Ting Yu, and Xiaokui Xiao. Prompt inference attack on
+distributed large language model inference frameworks. In
+<span><em>Proceedings of the 2025 <span>ACM</span> <span>SIGSAC</span>
+Conference on Computer and Communications Security</em></span>, pages
+1739–1753, 2025. arXiv:2503.09291.</p>
+<p>Milad Nasr, Jamie Hayes, Thomas Steinke, Borja Balle, Florian
+Tram<span>è</span>r, Matthew Jagielski, Nicholas Carlini, and Andreas
+Terzis. Tight auditing of differentially private machine learning. In
+<span><em>32nd <span>USENIX</span> Security Symposium
+(<span>USENIX</span> Security 23)</em></span>, pages 1631–1648, Anaheim,
+CA, August 2023. <span>USENIX</span> Association.</p>
+<p>Jack Min Ong, Matthew Di Ferrante, Aaron Pazdera, Ryan Garner, Sami
+Jaghouar, Manveer Basra, Max Ryabinin, and Johannes Hagemann. : A
+locality sensitive hashing scheme for trustless verifiable inference,
+2025.</p>
+<p>Dario Pasquini, Giuseppe Ateniese, and Massimo Bernaschi. Unleashing
+the tiger: Inference attacks on split learning. In <span><em>Proceedings
+of the 2021 <span>ACM</span> <span>SIGSAC</span> Conference on Computer
+and Communications Security</em></span>, pages 2113–2129, 2021.</p>
+<p>Ivo Petrov, Dimitar I. Dimitrov, Maximilian Baader, Mark Niklas
+M<span>ü</span>ller, and Martin Vechev. : Exact gradient inversion for
+large language models. In <span><em>Advances in Neural Information
+Processing Systems (<span>NeurIPS</span>)</em></span>, volume 37,
+2024.</p>
+<p>Krishna Pillutla, Galen Andrew, Peter Kairouz, H. Brendan McMahan,
+Alina Oprea, and Sewoong Oh. Unleashing the power of randomization in
+auditing differentially private <span>ML</span>. In <span><em>Federated
+Learning and Analytics in Practice Workshop at
+<span>ICML</span></em></span>, 2023.</p>
+<p>Abhishek Singh, Vivek Sharma, Rohan Sukumaran, John Mose, Jeffrey
+Chiu, Justin Yu, and Ramesh Raskar. : Split inference—mechanisms,
+benchmarks and attacks. In <span><em>Computer Vision – <span>ECCV</span>
+2024</em></span>, volume 15134 of <span><em>Lecture Notes in Computer
+Science</em></span>, pages 214–232. Springer Nature Switzerland,
+2024.</p>
+<p>Liwei Song and Prateek Mittal. Systematic evaluation of privacy risks
+of machine learning models. In <span><em>30th <span>USENIX</span>
+Security Symposium (<span>USENIX</span> Security 21)</em></span>, pages
+2615–2632. <span>USENIX</span> Association, August 2021.</p>
+<p>Thomas Steinke, Milad Nasr, and Matthew Jagielski. Privacy auditing
+with one (1) training run. In <span><em>Advances in Neural Information
+Processing Systems (<span>NeurIPS</span>)</em></span>, volume 36, 2023.
+Full version: arXiv:2305.08846.</p>
+<p>Xiaoxiao Sun, Nidham Gazagnadou, Vivek Sharma, Lingjuan Lyu, Hongdong
+Li, and Liang Zheng. Privacy assessment on reconstructed images: Are
+existing evaluation metrics faithful to human perception? In
+<span><em>Advances in Neural Information Processing Systems
+(<span>NeurIPS</span>)</em></span>, volume 36, 2023.</p>
+<p>Praneeth Vepakomma, Otkrist Gupta, Tristan Swedish, and Ramesh
+Raskar. Split learning for health: Distributed deep learning without
+sharing raw patient data, 2018.</p>
+<p>Rui Xu et al. Lightweight and unobtrusive data obfuscation at
+<span>IoT</span> edge for remote inference, 2019.</p>
+<p>Jiawen Zhang et al. : Secure transformer inference made
+non-interactive. In <span><em>NDSS</em></span>, 2025. IACR ePrint
+2024/136.</p>
+<p>Fei Zheng, Chaochao Chen, Zhongxuan Han, and Xiaolin Zheng. : Private
+inference of large language models within 3 seconds under
+<span>WAN</span>, 2024.</p>
+<p>Jianwei Zhu, Hang Yin, Peng Deng, Aline Almeida, and Shunfan Zhou.
+Confidential computing on <span>NVIDIA</span> hopper <span>GPUs</span>:
+A performance benchmark study, 2024.</p>
+<p>Ligeng Zhu, Zhijian Liu, and Song Han. Deep leakage from gradients.
+In <span><em>Advances in Neural Information Processing Systems
+(<span>NeurIPS</span>)</em></span>, volume 32, 2019.</p>
+</div>
+</body>
+</html>

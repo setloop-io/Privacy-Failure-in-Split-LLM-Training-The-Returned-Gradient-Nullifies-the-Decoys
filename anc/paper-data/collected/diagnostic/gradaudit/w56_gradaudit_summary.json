@@ -1,0 +1,294 @@
+{
+  "cells": [
+    {
+      "cell": "gradaudit_ladder_s13_2k",
+      "grad_real": {
+        "ci95": [
+          0.1703,
+          0.786
+        ],
+        "paired_pp": 0.4796,
+        "verdict": "resolves"
+      },
+      "grad_real_shuffled": {
+        "ci95": [
+          -0.326,
+          0.1769
+        ],
+        "paired_pp": -0.0702,
+        "verdict": "at-floor"
+      },
+      "support_leak": {
+        "agree": 512,
+        "frames": 512,
+        "row_agreement": 1.0
+      },
+      "wire_real": {
+        "ci95": [
+          1.5696,
+          3.2971
+        ],
+        "paired_pp": 2.4147,
+        "verdict": "resolves"
+      }
+    },
+    {
+      "cell": "gradaudit_ladder_s17_2k",
+      "grad_real": {
+        "ci95": [
+          -0.8346,
+          -0.0509
+        ],
+        "paired_pp": -0.4314,
+        "verdict": "at-floor"
+      },
+      "grad_real_shuffled": {
+        "ci95": [
+          -0.135,
+          0.2183
+        ],
+        "paired_pp": 0.0399,
+        "verdict": "at-floor"
+      },
+      "support_leak": {
+        "agree": 512,
+        "frames": 512,
+        "row_agreement": 1.0
+      },
+      "wire_real": {
+        "ci95": [
+          -0.1939,
+          0.4449
+        ],
+        "paired_pp": 0.1329,
+        "verdict": "at-floor"
+      }
+    },
+    {
+      "cell": "gradaudit_ladder_s19_2k",
+      "grad_real": {
+        "ci95": [
+          -0.4287,
+          -0.0091
+        ],
+        "paired_pp": -0.2131,
+        "verdict": "at-floor"
+      },
+      "grad_real_shuffled": {
+        "ci95": [
+          -0.0522,
+          0.1142
+        ],
+        "paired_pp": 0.027,
+        "verdict": "at-floor"
+      },
+      "support_leak": {
+        "agree": 512,
+        "frames": 512,
+        "row_agreement": 1.0
+      },
+      "wire_real": {
+        "ci95": [
+          -0.3017,
+          0.0259
+        ],
+        "paired_pp": -0.1319,
+        "verdict": "at-floor"
+      }
+    },
+    {
+      "cell": "gradaudit_a2b_40k",
+      "grad_real": {
+        "ci95": [
+          0.7091,
+          1.1505
+        ],
+        "paired_pp": 0.9302,
+        "verdict": "resolves"
+      },
+      "grad_real_shuffled": {
+        "ci95": [
+          -0.0493,
+          0.0289
+        ],
+        "paired_pp": -0.0112,
+        "verdict": "at-floor"
+      },
+      "support_leak": {
+        "agree": 4096,
+        "frames": 4096,
+        "row_agreement": 1.0
+      },
+      "wire_real": {
+        "ci95": [
+          0.4866,
+          1.0525
+        ],
+        "paired_pp": 0.7702,
+        "verdict": "resolves"
+      }
+    },
+    {
+      "cell": "gradaudit_a2c_100k",
+      "grad_real": {
+        "ci95": [
+          0.6961,
+          1.1204
+        ],
+        "paired_pp": 0.9066,
+        "verdict": "resolves"
+      },
+      "grad_real_shuffled": {
+        "ci95": [
+          -0.2177,
+          0.0368
+        ],
+        "paired_pp": -0.0926,
+        "verdict": "at-floor"
+      },
+      "support_leak": {
+        "agree": 4096,
+        "frames": 4096,
+        "row_agreement": 1.0
+      },
+      "wire_real": {
+        "ci95": [
+          0.4499,
+          0.9799
+        ],
+        "paired_pp": 0.7137,
+        "verdict": "resolves"
+      }
+    },
+    {
+      "cell": "gradaudit_d96_10k",
+      "grad_real": {
+        "ci95": [
+          -0.648,
+          0.4819
+        ],
+        "paired_pp": -0.0861,
+        "verdict": "at-floor"
+      },
+      "grad_real_shuffled": {
+        "ci95": [
+          -0.1604,
+          0.3332
+        ],
+        "paired_pp": 0.0824,
+        "verdict": "at-floor"
+      },
+      "support_leak": {
+        "agree": 512,
+        "frames": 512,
+        "row_agreement": 1.0
+      },
+      "wire_real": {
+        "ci95": [
+          -0.7643,
+          0.0167
+        ],
+        "paired_pp": -0.3768,
+        "verdict": "at-floor"
+      }
+    },
+    {
+      "cell": "gradaudit_d128_10k",
+      "grad_real": {
+        "ci95": [
+          -0.7478,
+          0.5143
+        ],
+        "paired_pp": -0.119,
+        "verdict": "at-floor"
+      },
+      "grad_real_shuffled": {
+        "ci95": [
+          -0.0775,
+          0.2352
+        ],
+        "paired_pp": 0.0702,
+        "verdict": "at-floor"
+      },
+      "support_leak": {
+        "agree": 512,
+        "frames": 512,
+        "row_agreement": 1.0
+      },
+      "wire_real": {
+        "ci95": [
+          -0.601,
+          0.1112
+        ],
+        "paired_pp": -0.2515,
+        "verdict": "at-floor"
+      }
+    },
+    {
+      "cell": "gradaudit_d96_10k_4k",
+      "grad_real": {
+        "ci95": [
+          0.4544,
+          1.2618
+        ],
+        "paired_pp": 0.8635,
+        "verdict": "resolves"
+      },
+      "grad_real_shuffled": {
+        "ci95": [
+          -0.0488,
+          0.0381
+        ],
+        "paired_pp": -0.0061,
+        "verdict": "at-floor"
+      },
+      "support_leak": {
+        "agree": 4096,
+        "frames": 4096,
+        "row_agreement": 1.0
+      },
+      "wire_real": {
+        "ci95": [
+          0.0059,
+          0.2589
+        ],
+        "paired_pp": 0.1278,
+        "verdict": "resolves"
+      }
+    },
+    {
+      "cell": "gradaudit_d128_10k_4k",
+      "grad_real": {
+        "ci95": [
+          -0.7596,
+          -0.2062
+        ],
+        "paired_pp": -0.4823,
+        "verdict": "at-floor"
+      },
+      "grad_real_shuffled": {
+        "ci95": [
+          -0.0442,
+          0.0122
+        ],
+        "paired_pp": -0.0153,
+        "verdict": "at-floor"
+      },
+      "support_leak": {
+        "agree": 4096,
+        "frames": 4096,
+        "row_agreement": 1.0
+      },
+      "wire_real": {
+        "ci95": [
+          -0.0986,
+          0.1662
+        ],
+        "paired_pp": 0.0356,
+        "verdict": "at-floor"
+      }
+    }
+  ],
+  "note": "W5.6 E6 audit, packaged code, seed 42, grad_dp=off. Seven original cells plus the two deep-frame (4096) D-cell re-runs that supersede the 512-frame readings: D=96 resolves at depth, D=128 does not (genuine width effect).",
+  "schema": "dtraining.gradaudit_w56.v1"
+}

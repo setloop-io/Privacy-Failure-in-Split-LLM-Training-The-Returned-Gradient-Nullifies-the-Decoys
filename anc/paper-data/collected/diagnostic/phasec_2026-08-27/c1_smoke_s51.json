@@ -1,0 +1,148 @@
+{
+  "active_cloud_delta": 0.0,
+  "adversary_strength": 1.0,
+  "attacker_updates": 3,
+  "baseline_eval_loss": 5.258177734911442,
+  "baseline_eval_seconds": 0.8717718849657103,
+  "bundle_canonical_fraction": 0.0,
+  "byzantine_flagged_frames": 0,
+  "byzantine_max_relative_deviation": 0.0,
+  "byzantine_threshold": null,
+  "byzantine_verified_frames": 0,
+  "byzantine_verify": false,
+  "candidate_eval_loss": 6.8088576048612595,
+  "candidate_eval_seconds": 0.7031024610623717,
+  "chaff_tokens": 48,
+  "cloud_channels": 1,
+  "cloud_correction_loss_improvement": 0.09224939346313477,
+  "cloud_experts": 8,
+  "cloud_kind": "monomial_moe_radial",
+  "cloud_layers": 2,
+  "cloud_state_contains_hidden_width": false,
+  "device": "cuda",
+  "dp": {
+    "adjacency": "replace_one",
+    "delta": 1e-06,
+    "epsilon": {
+      "composed": 98435.4710157669,
+      "forward": 49695.08738900771,
+      "return": 49695.08738900771
+    },
+    "method": "zcdp_gaussian_replace_one",
+    "parameters": {
+      "forward_clip": 1.0,
+      "forward_noise_multiplier": 0.35,
+      "return_clip": 1.0,
+      "return_noise_multiplier": 0.35
+    },
+    "releases": {
+      "forward": 2944,
+      "return": 2944
+    },
+    "rho": {
+      "forward": 48065.30612244894,
+      "return": 48065.30612244894
+    }
+  },
+  "dp_untransmitted_releases_excluded": {
+    "encode_calls": 768,
+    "rows": 24576,
+    "site": "post-training probe phase: tln.encode with no chan.forward"
+  },
+  "eval_blocks": 32,
+  "eval_loss_delta": 1.5506798699498177,
+  "eval_time_ratio": 0.8065211475477063,
+  "fragment_channels": 1,
+  "gates": {
+    "cloud_correction_improves_loss": true,
+    "cloud_latent_only": true,
+    "eval_time_ratio_le_3": true,
+    "privacy_above_band_le_1pct": true,
+    "secret_coordinates_hidden_from_ucn": true,
+    "token_norm_and_sign_gauged": false,
+    "token_order_hidden_from_ucn": true,
+    "utility_delta_le_0_35": false
+  },
+  "gram_flatten": 0.0,
+  "hidden_dim": 1024,
+  "label_free_majority_pct": 4.53125,
+  "latent_dim": 64,
+  "limitations": [
+    "two-node latent protocol exercised",
+    "short training run; not convergence or paper evidence",
+    "fresh probe is a diagnostic subset, not the complete /attacker suite"
+  ],
+  "mean_step_seconds": 0.083079048517781,
+  "mine_mi_nats_held_out": -0.00044718384742736816,
+  "mine_penalty": 0.1,
+  "model": "/workspace/experiments/models/qwen3-0.6b",
+  "noise_multiplier": 0.35,
+  "probe_recovery_pct": [
+    4.21875,
+    3.28125,
+    3.203125
+  ],
+  "probe_restarts": 3,
+  "public_steps": 0,
+  "recovery_above_label_free_pct": -0.3125,
+  "remote_grad_clip": 1.0,
+  "remote_protocol": {
+    "cloud_experts": 8,
+    "cloud_hidden": 0,
+    "cloud_kind": "monomial_moe_radial",
+    "cloud_layers": 2,
+    "cloud_seed": 3299397127079872416,
+    "latent_dim": 64,
+    "latent_only_audit": true,
+    "max_parameter_dimension": 8,
+    "op": "hello_ack",
+    "session_id": "d58a74b3-4c9a-4a5b-930a-d7e9fe7c355f",
+    "state_shape_digest": "db573d04caa3eb69ceab368412149b0ba83b72453c329591fcb5c342ff5905d1"
+  },
+  "remote_tampered_frames": 0,
+  "resume_after": 26,
+  "schema": "dtraining.latent_native_v5_06b.v1",
+  "secret_token_gauge": false,
+  "secret_token_permutation": true,
+  "secret_wire_rotation": true,
+  "seed": 51,
+  "sequence_length": 32,
+  "split_after": 21,
+  "status": "completed",
+  "steps": 60,
+  "token_recovery_pct": 4.21875,
+  "token_scale_sigma": 0.75,
+  "tln_peak_cuda_memory_mb": 1489.1,
+  "train_blocks": 32,
+  "train_seconds": 4.98474291106686,
+  "training_tail": [
+    {
+      "attacker_loss": 7.582320213317871,
+      "distill_loss": 0.37508106231689453,
+      "gram_flatten_loss": 0.0,
+      "language_loss": 6.391205787658691,
+      "phase_step": 57,
+      "step": 57
+    },
+    {
+      "attacker_loss": 7.679391860961914,
+      "distill_loss": 0.3560923933982849,
+      "gram_flatten_loss": 0.0,
+      "language_loss": 7.360004425048828,
+      "phase_step": 58,
+      "step": 58
+    },
+    {
+      "attacker_loss": 7.709358215332031,
+      "distill_loss": 0.3835478723049164,
+      "gram_flatten_loss": 0.0,
+      "language_loss": 7.601987838745117,
+      "phase_step": 59,
+      "step": 59
+    }
+  ],
+  "transport_tls": true,
+  "warmup_steps": 20,
+  "wire_quant": "none",
+  "zero_cloud_eval_loss": 6.901106998324394
+}

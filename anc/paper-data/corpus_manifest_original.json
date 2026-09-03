@@ -1,0 +1,19 @@
+{
+  "schema": "dtraining.corpus_manifest.v1",
+  "path_in_runs": "/workspace/experiments/models/wikitext2_corpus.txt",
+  "original": true,
+  "note": "The campaign's private corpus (not committed to the repo; provenance recorded per PR-101 review). The sha256 below is the binding identity of the exact bytes used in every v6-v13 cell.",
+  "variant": "WikiText-2 tokenized (wikitext-2-v1 style): contains <unk> markers (12,095 lines) and @-@ punctuation spacing. NOT the raw variant (wikitext-2-raw-v1) that PR-101 reconstructed from — this variant difference is the most plausible driver of the D4 attenuation: the tokenized variant carries more predictable intra-frame structure.",
+  "derived_public_split": {
+    "path_in_runs": "/workspace/experiments/models/wikitext2_public.txt",
+    "derivation": "tail -c +200000 (bin/latent_v9_stage_e5.sh:13)",
+    "disjointness_verified": "private train+eval window = first 512 blocks x 33 tokens = 74,796 bytes << 200,000-byte offset; disjoint, with 2.7x margin",
+    "sha256": "recorded per run in v10.1/v12.2/v9.3 cells"
+  },
+  "scope_caveat": "All v6-v13 cells use only the first 16,896 tokens (~74.8 KB) of this 10.3 MB file: 256 train + 256 eval blocks of 33 tokens. Campaign numbers characterize this window, not the corpus generally.",
+  "bytes": 10316588,
+  "sha256": "78b6bfb90cfd718f0c27d42b1fd2231b139d1dda75d7d796e6a603b2e5cd7efe",
+  "lines": 14284,
+  "line_endings": "LF",
+  "file_mtime": "2026-08-04T01:49:35+01:00 (predates and was stable through the campaign)"
+}
